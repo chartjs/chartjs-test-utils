@@ -1,0 +1,44 @@
+{
+  "name": "chartjs-test-utils",
+  "version": "0.1.0",
+  "description": "Chart.js test utils",
+  "main": "dist/chartjs-test-utils.js",
+  "module": "dist/chartjs-test-utils.js",
+  "scripts": {
+    "build": "rollup -c",
+    "lint": "eslint src/**/*.js",
+    "test": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chartjs/chartjs-test-utils.git"
+  },
+  "keywords": [
+    "chart.js",
+    "karma",
+    "jasmine",
+    "fixture",
+    "test",
+    "utils"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chartjs/chartjs-test-utils/issues"
+  },
+  "homepage": "https://github.com/chartjs/chartjs-test-utils#readme",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
+    "eslint": "^7.16.0",
+    "eslint-config-chartjs": "^0.3.0",
+    "eslint-plugin-es": "^4.1.0",
+    "rollup": "^2.35.1"
+  },
+  "dependencies": {
+    "jasmine": "^3.6.3",
+    "karma": "^5.2.3",
+    "karma-jasmine": "^4.0.1",
+    "pixelmatch": "^5.2.1"
+  }
+}
