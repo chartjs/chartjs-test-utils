@@ -1,6 +1,6 @@
 {
   "name": "chartjs-test-utils",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Chart.js test utils",
   "main": "dist/chartjs-test-utils.js",
   "module": "dist/chartjs-test-utils.js",
