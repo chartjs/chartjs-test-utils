@@ -167,7 +167,7 @@ export function triggerMouseEvent(chart, type, el) {
   var event = new MouseEvent(type, {
     clientX: rect.left + point.x,
     clientY: rect.top + point.y,
-    cancellable: true,
+    cancelable: true,
     bubbles: true,
     view: window
   });
