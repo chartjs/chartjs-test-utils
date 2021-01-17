@@ -5,6 +5,7 @@ export default class Context {
     this._initMethods();
 
     this._fillStyle = null;
+    this._font = null;
     this._lineCap = null;
     this._lineDashOffset = null;
     this._lineJoin = null;
@@ -22,6 +23,15 @@ export default class Context {
         set: function(style) {
           this._fillStyle = style;
           this.record('setFillStyle', [style]);
+        }
+      },
+      font: {
+        get: function() {
+          return this._font;
+        },
+        set: function(font) {
+          this._font = font;
+          this.record('setFont', [font]);
         }
       },
       lineCap: {
