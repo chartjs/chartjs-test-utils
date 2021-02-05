@@ -160,7 +160,7 @@ function _resolveElementPoint(el) {
   return point;
 }
 
-export function triggerMouseEvent(chart, type, el) {
+export async function triggerMouseEvent(chart, type, el) {
   var node = chart.canvas;
   var rect = node.getBoundingClientRect();
   var point = _resolveElementPoint(el);
@@ -172,5 +172,11 @@ export function triggerMouseEvent(chart, type, el) {
     view: window
   });
 
+  var promise = new Promise((resolve) => {
+    afterEvent(chart, type, resolve);
+  });
+
   node.dispatchEvent(event);
+
+  await promise;
 }
