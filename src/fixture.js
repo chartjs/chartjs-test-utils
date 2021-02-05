@@ -21,7 +21,7 @@ function loadConfig(url, callback) {
   readFile(url, function(content) {
     switch (type) {
     case 'js':
-      cfg = new Function('"use strict"; var module = {};' + content + '; return module.exports;')();
+      cfg = new Function('"use strict"; var module = {};' + content + '; return module.exports || fixture;')();
       break;
     case 'json':
       cfg = JSON.parse(content);
@@ -48,16 +48,24 @@ function specFromFixture(description, inputs) {
       }
 
       var chart = _acquireChart(config, json.options);
-      if (!inputs.png) {
-        fail(descr + '\r\nMissing PNG comparison file for ' + input);
-        done();
-      }
+      const _done = () => {
+        if (!inputs.png) {
+          fail(descr + '\r\nMissing PNG comparison file for ' + input);
+          done();
+        }
 
-      readImageData(inputs.png, function(expected) {
-        expect(chart).toEqualImageData(expected, json);
-        _releaseChart(chart);
-        done();
-      });
+        readImageData(inputs.png, function(expected) {
+          expect(chart).toEqualImageData(expected, json);
+          _releaseChart(chart);
+          done();
+        });
+      };
+      const run = json.options && json.options.run;
+      if (typeof run === 'function') {
+        json.options.run(chart, _done);
+      } else {
+        _done();
+      }
     });
   });
 }
