@@ -62,7 +62,7 @@ function specFromFixture(description, inputs) {
       };
       const run = json.options && json.options.run;
       if (typeof run === 'function') {
-        json.options.run(chart, _done);
+        Promise.resolve(run(chart)).finally(_done);
       } else {
         _done();
       }
