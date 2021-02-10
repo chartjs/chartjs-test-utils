@@ -2,6 +2,7 @@
 
 import pixelmatch from 'pixelmatch';
 import {createCanvas} from './utils';
+import toEqualOptions from './matchers.options';
 
 function toPercent(value) {
   return Math.round(value * 10000) / 100;
@@ -216,5 +217,6 @@ export default {
   toEqualOneOf,
   toBeValidChart,
   toBeChartOfSize,
-  toEqualImageData
+  toEqualImageData,
+  toEqualOptions
 };
