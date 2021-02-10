@@ -1,13 +1,13 @@
 {
   "name": "chartjs-test-utils",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Chart.js test utils",
   "main": "dist/chartjs-test-utils.js",
   "module": "dist/chartjs-test-utils.js",
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint src/**/*.js",
-    "test": "npm run lint"
+    "test": "npm run lint && npx mocha -r esm"
   },
   "repository": {
     "type": "git",
@@ -35,6 +35,8 @@
     "eslint": "^7.19.0",
     "eslint-config-chartjs": "^0.3.0",
     "eslint-plugin-es": "^4.1.0",
+    "esm": "^3.2.25",
+    "mocha": "^8.2.1",
     "rollup": "^2.38.5"
   },
   "dependencies": {
