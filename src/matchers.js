@@ -2,7 +2,7 @@
 
 import pixelmatch from 'pixelmatch';
 import {createCanvas} from './utils';
-import toEqualOptions from './matchers.options';
+import {toEqualOptions} from './matchers.options';
 
 function toPercent(value) {
   return Math.round(value * 10000) / 100;
