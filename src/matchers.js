@@ -41,7 +41,9 @@ function buildPixelMatchPreview(actual, expected, diff, threshold, tolerance, co
     var item = document.createElement('div');
     item.style.cssText = 'text-align: center; font: 12px monospace; line-height: 1.4; margin: 8px';
     item.innerHTML = '<div style="margin: 8px; height: 32px">' + values.label + '</div>';
-    item.appendChild(canvasFromImageData(values.data));
+    var canvas = canvasFromImageData(values.data);
+    canvas.style.cssText = 'border: 1px dashed red';
+    item.appendChild(canvas);
     wrapper.appendChild(item);
   });
 
@@ -178,7 +180,7 @@ function toEqualImageData() {
       var debug = opts.debug || false;
       var tolerance = opts.tolerance === undefined ? 0.001 : opts.tolerance;
       var threshold = opts.threshold === undefined ? 0.1 : opts.threshold;
-      var ctx, idata, ddata, w, h, count, ratio;
+      var ctx, idata, ddata, w, h, aw, ah, count, ratio;
 
       if (actual instanceof Chart) {
         ctx = actual.ctx;
@@ -191,9 +193,15 @@ function toEqualImageData() {
       if (ctx) {
         h = expected.height;
         w = expected.width;
-        idata = ctx.getImageData(0, 0, w, h);
+        aw = ctx.canvas.width;
+        ah = ctx.canvas.height;
+        idata = ctx.getImageData(0, 0, aw, ah);
         ddata = createImageData(w, h);
-        count = pixelmatch(idata.data, expected.data, ddata.data, w, h, {threshold: threshold});
+        if (aw === w && ah === h) {
+          count = pixelmatch(idata.data, expected.data, ddata.data, w, h, {threshold: threshold});
+        } else {
+          count = Math.abs(aw * ah - w * h);
+        }
         ratio = count / (w * h);
 
         if ((ratio > tolerance) || debug) {
