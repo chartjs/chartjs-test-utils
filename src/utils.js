@@ -140,7 +140,7 @@ export function afterEvent(chart, type, callback) {
   var override = chart._eventHandler;
   chart._eventHandler = function(event) {
     override.call(this, event);
-    if (event.type === type) {
+    if (event.type === type || (event.native && event.native.type === type)) {
       chart._eventHandler = override;
       // eslint-disable-next-line callback-return
       callback();

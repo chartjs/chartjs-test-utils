@@ -1,6 +1,6 @@
 {
   "name": "chartjs-test-utils",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Chart.js test utils",
   "main": "dist/chartjs-test-utils.js",
   "module": "dist/chartjs-test-utils.js",
@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/chartjs/chartjs-test-utils#readme",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "eslint": "^7.20.0",
     "eslint-config-chartjs": "^0.3.0",
