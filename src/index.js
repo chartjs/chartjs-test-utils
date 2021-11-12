@@ -11,13 +11,13 @@ var charts = {};
 /**
  * Injects a new canvas (and div wrapper) and creates the associated Chart instance
  * using the given config. Additional options allow tweaking elements generation.
- * @param {object} config - Chart config.
- * @param {object} options - Chart acquisition options.
- * @param {object} options.canvas - Canvas attributes.
- * @param {object} options.wrapper - Canvas wrapper attributes.
- * @param {boolean} options.useOffscreenCanvas - use an OffscreenCanvas instead of the normal HTMLCanvasElement.
- * @param {boolean} options.useShadowDOM - use shadowDom
- * @param {boolean} options.persistent - If true, the chart will not be released after the spec.
+ * @param {object} [config] - Chart config.
+ * @param {object} [options] - Chart acquisition options.
+ * @param {object} [options.canvas] - Canvas attributes.
+ * @param {object} [options.wrapper] - Canvas wrapper attributes.
+ * @param {boolean} [options.useOffscreenCanvas] - use an OffscreenCanvas instead of the normal HTMLCanvasElement.
+ * @param {boolean} [options.useShadowDOM] - use shadowDom
+ * @param {boolean} [options.persistent] - If true, the chart will not be released after the spec.
  */
 export function acquireChart(config, options) {
   var chart = _acquireChart(config, options);
