@@ -179,4 +179,6 @@ export async function triggerMouseEvent(chart, type, el) {
   node.dispatchEvent(event);
 
   await promise;
+
+  return event;
 }
