@@ -2,6 +2,7 @@
   "name": "chartjs-test-utils",
   "version": "0.4.0",
   "description": "Chart.js test utils",
+  "type": "module",
   "main": "dist/chartjs-test-utils.js",
   "module": "dist/chartjs-test-utils.js",
   "scripts": {
