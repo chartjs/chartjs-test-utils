@@ -1,5 +1,5 @@
 import assert from 'assert';
-import {toEqualOptions} from '../src/matchers.options';
+import {toEqualOptions} from '../src/matchers.options.js';
 
 describe('matchers', function() {
   describe('toEqualOptions', function() {
