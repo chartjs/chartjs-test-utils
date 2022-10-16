@@ -1,9 +1,10 @@
 import Context from './context';
 import matchers from './matchers';
-import {_acquireChart, _releaseChart, injectCSS} from './utils';
+import {injectCSS} from './helpers/dom';
+import {_acquireChart, _releaseChart} from './helpers/index';
 
 export {specsFromFixtures} from './fixture';
-export {afterEvent, waitForResize, triggerMouseEvent} from './utils';
+export {afterEvent, waitForResize, triggerMouseEvent} from './events';
 
 // Keep track of all acquired charts to automatically release them after each specs
 const charts = {};
@@ -36,15 +37,16 @@ export function createMockContext() {
 
 export function injectWrapperCSS() {
   // some style initialization to limit differences between browsers across different platforms.
-  injectCSS(
-    '.chartjs-wrapper, .chartjs-wrapper canvas {' +
-		'border: 0;' +
-		'margin: 0;' +
-		'padding: 0;' +
-		'}' +
-		'.chartjs-wrapper {' +
-		'position: absolute' +
-		'}');
+  injectCSS(`
+  .chartjs-wrapper, .chartjs-wrapper canvas {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .chartjs-wrapper: {
+    position: absolute;
+  }
+  `);
 }
 
 export function addMatchers() {

@@ -1,5 +1,5 @@
 import pixelmatch from 'pixelmatch';
-import {createCanvas, getCtx} from './utils';
+import {createCanvas, getCtx} from './helpers/index';
 import {toEqualOptions} from './matchers.options';
 
 function toPercent(value) {

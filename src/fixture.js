@@ -1,31 +1,4 @@
-import {readImageData, _acquireChart, _releaseChart} from './utils';
-
-function readFile(url, callback) {
-  const request = new XMLHttpRequest();
-  request.onreadystatechange = function() {
-    if (request.readyState === 4) {
-      return callback(request.responseText);
-    }
-  };
-
-  request.open('GET', url, false);
-  request.send(null);
-}
-
-function createJsConfig(content) {
-  return new Function(`
-"use strict";
-var module = {};
-${content};
-return module.exports || fixture;'`
-  )();
-}
-
-function loadConfig(url, callback) {
-  const parser = url.endsWith('.js') ? createJsConfig : JSON.parse;
-
-  readFile(url, (content) => callback(parser(content)));
-}
+import {_acquireChart, _releaseChart, loadConfig, readImageData} from './helpers/index';
 
 function specFromFixture(description, inputs) {
   const input = inputs.js || inputs.json;
