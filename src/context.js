@@ -102,8 +102,8 @@ export default class Context {
   _initMethods() {
     // define methods to test here
     // no way to introspect so we have to do some extra work :(
-    var me = this;
-    var methods = {
+    const me = this;
+    const methods = {
       arc: function() { },
       arcTo: function() { },
       beginPath: function() { },

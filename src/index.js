@@ -2,11 +2,11 @@ import Context from './context';
 import matchers from './matchers';
 import {_acquireChart, _releaseChart, injectCSS} from './utils';
 
-export * from './fixture';
+export {specsFromFixtures} from './fixture';
 export {afterEvent, waitForResize, triggerMouseEvent} from './utils';
 
 // Keep track of all acquired charts to automatically release them after each specs
-var charts = {};
+const charts = {};
 
 /**
  * Injects a new canvas (and div wrapper) and creates the associated Chart instance
@@ -20,7 +20,7 @@ var charts = {};
  * @param {boolean} [options.persistent] - If true, the chart will not be released after the spec.
  */
 export function acquireChart(config, options) {
-  var chart = _acquireChart(config, options);
+  const chart = _acquireChart(config, options);
   charts[chart.id] = chart;
   return chart;
 }
@@ -53,7 +53,7 @@ export function addMatchers() {
 
 export function releaseCharts() {
   Object.keys(charts).forEach(function(id) {
-    var chart = charts[id];
+    const chart = charts[id];
     if (!(chart.$test || {}).persistent) {
       _releaseChart(chart);
     }

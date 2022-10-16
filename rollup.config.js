@@ -1,6 +1,7 @@
+import {readFileSync} from 'fs';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import {name, version, homepage, main} from './package.json';
+const {name, version, homepage, main} = JSON.parse(readFileSync('./package.json'));
 
 const banner = `/*!
 * ${name} v${version}

@@ -1,20 +1,20 @@
 import {spritingOn, spritingOff} from './spriting';
 
 export function createCanvas(w, h) {
-  var canvas = document.createElement('canvas');
+  const canvas = document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
   return canvas;
 }
 
 export function readImageData(url, callback) {
-  var image = new Image();
+  const image = new Image();
 
   image.onload = function() {
-    var h = image.height;
-    var w = image.width;
-    var canvas = createCanvas(w, h);
-    var ctx = canvas.getContext('2d');
+    const h = image.height;
+    const w = image.width;
+    const canvas = createCanvas(w, h);
+    const ctx = canvas.getContext('2d');
     ctx.drawImage(image, 0, 0, w, h);
     callback(ctx.getImageData(0, 0, w, h));
   };
@@ -34,9 +34,9 @@ export function readImageData(url, callback) {
  * @param {boolean} [options.persistent] - If true, the chart will not be released after the spec.
  */
 export function _acquireChart(config, options) {
-  var wrapper = document.createElement('div');
-  var canvas = document.createElement('canvas');
-  var chart, key;
+  const wrapper = document.createElement('div');
+  const canvas = document.createElement('canvas');
+  let chart, key;
 
   config = config || {};
   options = options || {};
@@ -73,7 +73,7 @@ export function _acquireChart(config, options) {
   window.document.body.appendChild(wrapper);
 
   try {
-    var ctx;
+    let ctx;
     if (options.useOffscreenCanvas) {
       if (!canvas.transferControlToOffscreen) {
         // If this browser does not support offscreen canvas, mark the test as 'pending', which will skip the
@@ -82,7 +82,7 @@ export function _acquireChart(config, options) {
         // remove if all browsers implement `transferControlToOffscreen`
         return pending();
       }
-      var offscreenCanvas = canvas.transferControlToOffscreen();
+      const offscreenCanvas = canvas.transferControlToOffscreen();
       ctx = offscreenCanvas.getContext('2d');
     } else {
       ctx = canvas.getContext('2d');
@@ -108,7 +108,7 @@ export function _releaseChart(chart) {
   spritingOff(chart.ctx);
   chart.destroy();
 
-  var wrapper = (chart.$test || {}).wrapper;
+  const wrapper = (chart.$test || {}).wrapper;
   if (wrapper && wrapper.parentNode) {
     wrapper.parentNode.removeChild(wrapper);
   }
@@ -116,8 +116,8 @@ export function _releaseChart(chart) {
 
 export function injectCSS(css) {
   // https://stackoverflow.com/q/3922139
-  var head = document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
+  const head = document.getElementsByTagName('head')[0];
+  const style = document.createElement('style');
   style.setAttribute('type', 'text/css');
   if (style.styleSheet) { // IE
     style.styleSheet.cssText = css;
@@ -128,7 +128,7 @@ export function injectCSS(css) {
 }
 
 export function waitForResize(chart, callback) {
-  var override = chart.resize;
+  const override = chart.resize;
   chart.resize = function() {
     chart.resize = override;
     override.apply(this, arguments);
@@ -137,7 +137,7 @@ export function waitForResize(chart, callback) {
 }
 
 export function afterEvent(chart, type, callback) {
-  var override = chart._eventHandler;
+  const override = chart._eventHandler;
   chart._eventHandler = function(event) {
     override.call(this, event);
     if (event.type === type || (event.native && event.native.type === type)) {
@@ -149,7 +149,7 @@ export function afterEvent(chart, type, callback) {
 }
 
 function _resolveElementPoint(el) {
-  var point = {x: 0, y: 0};
+  let point = {x: 0, y: 0};
   if (el) {
     if (typeof el.getCenterPoint === 'function') {
       point = el.getCenterPoint();
@@ -161,10 +161,10 @@ function _resolveElementPoint(el) {
 }
 
 export async function triggerMouseEvent(chart, type, el) {
-  var node = chart.canvas;
-  var rect = node.getBoundingClientRect();
-  var point = _resolveElementPoint(el);
-  var event = new MouseEvent(type, {
+  const node = chart.canvas;
+  const rect = node.getBoundingClientRect();
+  const point = _resolveElementPoint(el);
+  const event = new MouseEvent(type, {
     clientX: rect.left + point.x,
     clientY: rect.top + point.y,
     cancelable: true,
@@ -172,7 +172,7 @@ export async function triggerMouseEvent(chart, type, el) {
     view: window
   });
 
-  var promise = new Promise((resolve) => {
+  const promise = new Promise((resolve) => {
     afterEvent(chart, type, resolve);
   });
 
@@ -181,4 +181,16 @@ export async function triggerMouseEvent(chart, type, el) {
   await promise;
 
   return event;
+}
+
+export function getCtx(chart) {
+  let ctx;
+  if (chart instanceof Chart) {
+    ctx = chart.ctx;
+  } else if (chart instanceof HTMLCanvasElement) {
+    ctx = chart.getContext('2d');
+  } else if (chart instanceof CanvasRenderingContext2D) {
+    ctx = chart;
+  }
+  return ctx;
 }
