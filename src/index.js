@@ -5,6 +5,7 @@ import {_acquireChart, _releaseChart} from './helpers/index';
 
 export {specsFromFixtures} from './fixture';
 export {afterEvent, waitForResize, triggerMouseEvent} from './events';
+export {applyDefaultChartConfig, applyDefaultFixtureOptions} from './defaults';
 
 // Keep track of all acquired charts to automatically release them after each specs
 const charts = {};

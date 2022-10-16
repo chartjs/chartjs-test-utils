@@ -1,4 +1,4 @@
-import {applyDefaultChartConfig, applyDefaultFixtureOptions} from './defaults';
+import {applyDefaultChartConfig, applyDefaultFixtureOptions} from '../defaults';
 import {createWrapperAndCanvas} from './dom';
 import {spritingOn, spritingOff} from './spriting';
 
@@ -17,7 +17,7 @@ export function _acquireChart(config = {}, options = {}) {
   applyDefaultChartConfig(config);
   applyDefaultFixtureOptions(options);
 
-  const {wrapper, canvas} = createWrapperAndCanvas(config, options);
+  const {wrapper, canvas} = createWrapperAndCanvas(options);
   let chart;
 
   try {

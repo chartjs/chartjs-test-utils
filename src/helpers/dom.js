@@ -5,7 +5,7 @@ export function createCanvas(w, h) {
   return canvas;
 }
 
-export function createWrapperAndCanvas(config, options) {
+export function createWrapperAndCanvas(options) {
   const wrapper = document.createElement('div');
   const canvas = document.createElement('canvas');
 
