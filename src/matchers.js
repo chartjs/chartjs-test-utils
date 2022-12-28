@@ -1,7 +1,5 @@
-'use strict';
-
 import pixelmatch from 'pixelmatch';
-import {createCanvas} from './utils';
+import {createCanvas, getCtx} from './helpers/index';
 import {toEqualOptions} from './matchers.options';
 
 function toPercent(value) {
@@ -9,21 +7,21 @@ function toPercent(value) {
 }
 
 function createImageData(w, h) {
-  var canvas = createCanvas(w, h);
-  var context = canvas.getContext('2d');
+  const canvas = createCanvas(w, h);
+  const context = canvas.getContext('2d');
   return context.getImageData(0, 0, w, h);
 }
 
 function canvasFromImageData(data) {
-  var canvas = createCanvas(data.width, data.height);
-  var context = canvas.getContext('2d');
+  const canvas = createCanvas(data.width, data.height);
+  const context = canvas.getContext('2d');
   context.putImageData(data, 0, 0);
   return canvas;
 }
 
 function buildPixelMatchPreview(actual, expected, diff, threshold, tolerance, count, description) {
-  var ratio = count / (actual.width * actual.height);
-  var wrapper = document.createElement('div');
+  const ratio = count / (actual.width * actual.height);
+  const wrapper = document.createElement('div');
   wrapper.appendChild(document.createTextNode(description));
 
   wrapper.style.cssText = 'display: flex; overflow-y: auto';
@@ -38,10 +36,10 @@ function buildPixelMatchPreview(actual, expected, diff, threshold, tolerance, co
 			'tol: ' + toPercent(tolerance) + '%'
     }
   ].forEach(function(values) {
-    var item = document.createElement('div');
+    const item = document.createElement('div');
     item.style.cssText = 'text-align: center; font: 12px monospace; line-height: 1.4; margin: 8px';
     item.innerHTML = '<div style="margin: 8px; height: 32px">' + values.label + '</div>';
-    var canvas = canvasFromImageData(values.data);
+    const canvas = canvasFromImageData(values.data);
     canvas.style.cssText = 'border: 1px dashed red';
     item.appendChild(canvas);
     wrapper.appendChild(item);
@@ -58,13 +56,13 @@ function buildPixelMatchPreview(actual, expected, diff, threshold, tolerance, co
 function toBeCloseToPixel() {
   return {
     compare: function(actual, expected) {
-      var result = false;
+      let result = false;
 
       if (!isNaN(actual) && !isNaN(expected)) {
-        var diff = Math.abs(actual - expected);
-        var A = Math.abs(actual);
-        var B = Math.abs(expected);
-        var percentDiff = 0.005; // 0.5% diff
+        const diff = Math.abs(actual - expected);
+        const A = Math.abs(actual);
+        const B = Math.abs(expected);
+        const percentDiff = 0.005; // 0.5% diff
         result = (diff <= (A > B ? A : B) * percentDiff) || diff < 2; // 2 pixels is fine
       }
 
@@ -89,8 +87,8 @@ function toBeCloseToPoint() {
 function toEqualOneOf() {
   return {
     compare: function(actual, expecteds) {
-      var result = false;
-      for (var i = 0, l = expecteds.length; i < l; i++) {
+      let result = false;
+      for (let i = 0, l = expecteds.length; i < l; i++) {
         if (actual === expecteds[i]) {
           result = true;
           break;
@@ -106,7 +104,7 @@ function toEqualOneOf() {
 function toBeValidChart() {
   return {
     compare: function(actual) {
-      var message = null;
+      let message = null;
 
       if (!(actual instanceof Chart)) {
         message = 'Expected ' + actual + ' to be an instance of Chart';
@@ -131,21 +129,21 @@ function toBeValidChart() {
 function toBeChartOfSize() {
   return {
     compare: function(actual, expected) {
-      var res = toBeValidChart().compare(actual);
+      const res = toBeValidChart().compare(actual);
       if (!res.pass) {
         return res;
       }
 
-      var message = null;
-      var canvas = actual.ctx.canvas;
-      var style = getComputedStyle(canvas);
-      var pixelRatio = actual.options.devicePixelRatio || window.devicePixelRatio;
-      var dh = parseInt(style.height, 10) || 0;
-      var dw = parseInt(style.width, 10) || 0;
-      var rh = canvas.height;
-      var rw = canvas.width;
-      var orh = rh / pixelRatio;
-      var orw = rw / pixelRatio;
+      let message = null;
+      const canvas = actual.ctx.canvas;
+      const style = getComputedStyle(canvas);
+      const pixelRatio = actual.options.devicePixelRatio || window.devicePixelRatio;
+      const dh = parseInt(style.height, 10) || 0;
+      const dw = parseInt(style.width, 10) || 0;
+      const rh = canvas.height;
+      const rw = canvas.width;
+      const orh = rh / pixelRatio;
+      const orw = rw / pixelRatio;
 
       // sanity checks
       if (actual.height !== orh) {
@@ -176,33 +174,23 @@ function toBeChartOfSize() {
 function toEqualImageData() {
   return {
     compare: function(actual, expected, opts) {
-      var message = null;
-      var debug = opts.debug || false;
-      var tolerance = opts.tolerance === undefined ? 0.001 : opts.tolerance;
-      var threshold = opts.threshold === undefined ? 0.1 : opts.threshold;
-      var ctx, idata, ddata, w, h, aw, ah, count, ratio;
-
-      if (actual instanceof Chart) {
-        ctx = actual.ctx;
-      } else if (actual instanceof HTMLCanvasElement) {
-        ctx = actual.getContext('2d');
-      } else if (actual instanceof CanvasRenderingContext2D) {
-        ctx = actual;
-      }
+      const ctx = getCtx(actual);
+      const {debug = false, tolerance = 0.001, threshold = 0.1} = opts;
+      let message = null;
+      let count;
 
       if (ctx) {
-        h = expected.height;
-        w = expected.width;
-        aw = ctx.canvas.width;
-        ah = ctx.canvas.height;
-        idata = ctx.getImageData(0, 0, aw, ah);
-        ddata = createImageData(w, h);
+        const {height: h, width: w} = expected;
+        const {canvas: {width: aw, height: ah}} = ctx;
+        const idata = ctx.getImageData(0, 0, aw, ah);
+        const ddata = createImageData(w, h);
+
         if (aw === w && ah === h) {
           count = pixelmatch(idata.data, expected.data, ddata.data, w, h, {threshold: threshold});
         } else {
           count = Math.abs(aw * ah - w * h);
         }
-        ratio = count / (w * h);
+        const ratio = count / (w * h);
 
         if ((ratio > tolerance) || debug) {
           message = buildPixelMatchPreview(idata, expected, ddata, threshold, tolerance, count, opts.description);

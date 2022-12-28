@@ -1,12 +1,14 @@
 import Context from './context';
 import matchers from './matchers';
-import {_acquireChart, _releaseChart, injectCSS} from './utils';
+import {injectCSS} from './helpers/dom';
+import {_acquireChart, _releaseChart} from './helpers/index';
 
-export * from './fixture';
-export {afterEvent, waitForResize, triggerMouseEvent} from './utils';
+export {specsFromFixtures} from './fixture';
+export {afterEvent, waitForResize, triggerMouseEvent} from './events';
+export {applyDefaultChartConfig, applyDefaultFixtureOptions} from './defaults';
 
 // Keep track of all acquired charts to automatically release them after each specs
-var charts = {};
+const charts = {};
 
 /**
  * Injects a new canvas (and div wrapper) and creates the associated Chart instance
@@ -20,7 +22,7 @@ var charts = {};
  * @param {boolean} [options.persistent] - If true, the chart will not be released after the spec.
  */
 export function acquireChart(config, options) {
-  var chart = _acquireChart(config, options);
+  const chart = _acquireChart(config, options);
   charts[chart.id] = chart;
   return chart;
 }
@@ -36,15 +38,16 @@ export function createMockContext() {
 
 export function injectWrapperCSS() {
   // some style initialization to limit differences between browsers across different platforms.
-  injectCSS(
-    '.chartjs-wrapper, .chartjs-wrapper canvas {' +
-		'border: 0;' +
-		'margin: 0;' +
-		'padding: 0;' +
-		'}' +
-		'.chartjs-wrapper {' +
-		'position: absolute' +
-		'}');
+  injectCSS(`
+  .chartjs-wrapper, .chartjs-wrapper canvas {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .chartjs-wrapper: {
+    position: absolute;
+  }
+  `);
 }
 
 export function addMatchers() {
@@ -53,7 +56,7 @@ export function addMatchers() {
 
 export function releaseCharts() {
   Object.keys(charts).forEach(function(id) {
-    var chart = charts[id];
+    const chart = charts[id];
     if (!(chart.$test || {}).persistent) {
       _releaseChart(chart);
     }

@@ -6,6 +6,7 @@
   "main": "dist/chartjs-test-utils.js",
   "module": "dist/chartjs-test-utils.js",
   "scripts": {
+    "autobuild": "rollup -c -w",
     "build": "rollup -c",
     "lint": "eslint src/**/*.js",
     "test": "npm run lint && npx mocha -r esm"
@@ -31,14 +32,14 @@
   },
   "homepage": "https://github.com/chartjs/chartjs-test-utils#readme",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^22.0.2",
-    "@rollup/plugin-node-resolve": "^14.1.0",
+    "@rollup/plugin-commonjs": "^23.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
     "eslint": "^8.21.0",
     "eslint-config-chartjs": "^0.3.0",
     "eslint-plugin-es": "^4.1.0",
     "esm": "^3.2.25",
     "mocha": "^10.0.0",
-    "rollup": "^2.77.2"
+    "rollup": "^3.2.1"
   },
   "dependencies": {
     "pixelmatch": "^5.3.0"
