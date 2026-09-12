@@ -12,12 +12,13 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+          cache: npm
           registry-url: https://registry.npmjs.org/
-      - name: Setup and build
-        run: |
-          npm ci
-          npm test
-          npm run build
+      - run: npm ci
+      # The browser suite runs in CI on every push; this is the smoke test that
+      # the published sources at least lint and pass the node specs.
+      - run: npm run lint
+      - run: npm run test:unit
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}

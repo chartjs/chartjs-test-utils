@@ -1,17 +1,19 @@
 import assert from 'node:assert';
-import {toEqualOptions} from '../src/matchers.options.js';
+import {describe, it} from 'vitest';
 
-describe('matchers', function () {
-  describe('toEqualOptions', function () {
-    const compare = toEqualOptions().compare;
+import {compareOptions} from '../../src/matchers.options.js';
 
-    it('should ignore private properties', function () {
+describe('matchers', () => {
+  describe('compareOptions', () => {
+    const compare = compareOptions;
+
+    it('should ignore private properties', () => {
       const actual = {_test: true, a: 'test'};
       const expected = {a: 'test'};
       assert.strictEqual(compare(actual, expected).pass, true);
     });
 
-    it('should produce diff to string', function () {
+    it('should produce diff to string', () => {
       const actual = {
         s0: 's0',
         s1: 'not ok',
@@ -46,7 +48,7 @@ describe('matchers', function () {
       );
     });
 
-    it('should produce diff to number', function () {
+    it('should produce diff to number', () => {
       const actual = {
         n0: 123,
         n1: 'not ok',
@@ -81,7 +83,7 @@ describe('matchers', function () {
       );
     });
 
-    it('should produce diff to array', function () {
+    it('should produce diff to array', () => {
       const actual = {
         a0: [1, 2, 3],
         a1: ['a'],
@@ -141,7 +143,7 @@ describe('matchers', function () {
       );
     });
 
-    it('should produce diff to multiple levels', function () {
+    it('should produce diff to multiple levels', () => {
       const actual = {
         sub: {
           undef: false

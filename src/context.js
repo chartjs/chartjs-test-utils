@@ -102,21 +102,20 @@ export default class Context {
   _initMethods() {
     // define methods to test here
     // no way to introspect so we have to do some extra work :(
-    var me = this;
     var methods = {
-      arc: function () {},
-      arcTo: function () {},
-      beginPath: function () {},
-      bezierCurveTo: function () {},
-      clearRect: function () {},
-      clip: function () {},
-      closePath: function () {},
-      fill: function () {},
-      fillRect: function () {},
-      fillText: function () {},
-      strokeText: function () {},
-      lineTo: function () {},
-      measureText: function (text) {
+      arc: () => {},
+      arcTo: () => {},
+      beginPath: () => {},
+      bezierCurveTo: () => {},
+      clearRect: () => {},
+      clip: () => {},
+      closePath: () => {},
+      fill: () => {},
+      fillRect: () => {},
+      fillText: () => {},
+      strokeText: () => {},
+      lineTo: () => {},
+      measureText: (text) => {
         // return the number of characters * fixed size
         // Uses fake numbers for the bounding box
         return text
@@ -135,23 +134,23 @@ export default class Context {
               width: 0
             };
       },
-      moveTo: function () {},
-      quadraticCurveTo: function () {},
-      rect: function () {},
-      restore: function () {},
-      rotate: function () {},
-      save: function () {},
-      setLineDash: function () {},
-      stroke: function () {},
-      strokeRect: function () {},
-      setTransform: function () {},
-      translate: function () {}
+      moveTo: () => {},
+      quadraticCurveTo: () => {},
+      rect: () => {},
+      restore: () => {},
+      rotate: () => {},
+      save: () => {},
+      setLineDash: () => {},
+      stroke: () => {},
+      strokeRect: () => {},
+      setTransform: () => {},
+      translate: () => {}
     };
 
-    Object.keys(methods).forEach(function (name) {
-      me[name] = function () {
-        me.record(name, arguments);
-        return methods[name].apply(me, arguments);
+    Object.keys(methods).forEach((name) => {
+      this[name] = (...args) => {
+        this.record(name, args);
+        return methods[name].apply(this, args);
       };
     });
   }

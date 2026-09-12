@@ -5,7 +5,7 @@
   // (2-space indent, single quotes, semicolons, no spacing inside braces),
   // so that adopting the formatter is not also a restyling of the sources.
   "files": {
-    "includes": ["**/*.js", "**/*.json", "**/*.jsonc", "!dist", "!package-lock.json"]
+    "includes": ["**/*.js", "**/*.mjs", "**/*.ts", "**/*.json", "**/*.jsonc", "!package-lock.json"]
   },
   "formatter": {
     "enabled": true,
@@ -35,31 +35,21 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         // eslint: complexity [2, 10]. Cognitive complexity is a different
         // measure, so the threshold is not the same number.
         "noExcessiveCognitiveComplexity": {
           "level": "warn",
           "options": { "maxAllowedComplexity": 15 }
-        },
-        // The sources are written in the ES5 style Karma-era Chart.js used:
-        // `var`, `function () {}` callbacks, `arguments`, string concatenation.
-        // Modernizing them is a code change, not a tooling change, so these
-        // stay off until someone makes it deliberately.
-        "noArguments": "off",
-        "useArrowFunction": "off",
-        "useDateNow": "off",
-        "useOptionalChain": "off"
-      },
-      "correctness": {
-        // Same reason: this reports `var` declared inside a block.
-        "noInnerDeclarations": "off"
+        }
+        // These were off while the sources were ES5 (`var`, `arguments`,
+        // string concatenation). The Vitest rewrite has no such code left, so
+        // they are on: recommended defaults, nothing added.
       },
       "style": {
         // eslint: curly [2, all]
-        "useBlockStatements": "error",
-        "useTemplate": "off"
+        "useBlockStatements": "error"
       },
       "suspicious": {
         // eslint: no-console [2, {allow: [warn, error]}]
@@ -77,6 +67,20 @@
       }
     }
   },
+  "overrides": [
+    {
+      // Ported from 0.5.0 with only the Image guard changed, and kept diffable
+      // against that version. The optional-chain rewrite of `text && text.charCodeAt`
+      // is equivalent here only because the loops iterate over `text.length`,
+      // which is not a property of the guard worth relying on in a port.
+      "includes": ["src/spriting.js"],
+      "linter": {
+        "rules": {
+          "complexity": { "useOptionalChain": "off" }
+        }
+      }
+    }
+  ],
   "assist": {
     "actions": {
       "source": {

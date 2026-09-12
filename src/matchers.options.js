@@ -61,7 +61,7 @@ function compareObject(actual, expected, path = '') {
   }
 
   if (path !== '') {
-    path = path + '.';
+    path = `${path}.`;
   }
 
   for (const key in expected) {
@@ -103,10 +103,12 @@ function compareOption(actual, expected, path) {
   return ret;
 }
 
-export function toEqualOptions() {
-  return {
-    compare(actual, expected) {
-      return compareObject(actual, expected);
-    }
-  };
+/**
+ * Compares resolved chart options, ignoring private (`_`-prefixed) properties.
+ * @param {object} actual - the options to check
+ * @param {object} expected - the expected subset
+ * @returns {{pass: boolean, message: string}}
+ */
+export function compareOptions(actual, expected) {
+  return compareObject(actual, expected);
 }

@@ -1,0 +1,26 @@
+{
+  "description": "bar chart, no text",
+  "config": {
+    "type": "bar",
+    "data": {
+      "labels": ["a", "b", "c"],
+      "datasets": [
+        {
+          "data": [3, 1, 2],
+          "backgroundColor": "#36a2eb",
+          "borderColor": "#1c6ea4",
+          "borderWidth": 2
+        }
+      ]
+    },
+    "options": {
+      "scales": {
+        "x": { "display": false },
+        "y": { "display": false, "beginAtZero": true }
+      }
+    }
+  },
+  "options": {
+    "canvas": { "height": 256, "width": 256 }
+  }
+}
