@@ -1,6 +1,6 @@
 {
   "name": "chartjs-test-utils",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "Chart.js test utils for Vitest",
   "type": "module",
   "main": "./src/index.js",
@@ -46,7 +46,9 @@
     "@vitest/browser": "^5.0.0",
     "@vitest/browser-playwright": "^5.0.0",
     "chart.js": "^4.5.0",
+    "conventional-changelog-conventionalcommits": "^9.3.1",
     "playwright": "^1.63.0",
+    "semantic-release": "^25.0.9",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },
