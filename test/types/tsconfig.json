@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    // The point of this project: prove the published declarations compile for a
+    // consumer. `skipLibCheck: true` would hide exactly the mistakes it exists
+    // to catch.
+    "skipLibCheck": false,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "include": ["./consumer.ts"]
+}

@@ -6,6 +6,11 @@
  * instead of taking a callback.
  */
 
+/**
+ * @param {number} width
+ * @param {number} height
+ * @returns {HTMLCanvasElement}
+ */
 export function createCanvas(width, height) {
   const canvas = document.createElement('canvas');
   canvas.height = height;
@@ -13,10 +18,19 @@ export function createCanvas(width, height) {
   return canvas;
 }
 
+/**
+ * @param {number} width
+ * @param {number} height
+ * @returns {ImageData} blank image data of the given size
+ */
 export function createImageData(width, height) {
   return createCanvas(width, height).getContext('2d').getImageData(0, 0, width, height);
 }
 
+/**
+ * @param {ImageData} data
+ * @returns {HTMLCanvasElement} a canvas with the image data drawn on it
+ */
 export function canvasFromImageData(data) {
   const canvas = createCanvas(data.width, data.height);
   canvas.getContext('2d').putImageData(data, 0, 0);
@@ -42,6 +56,10 @@ export function readImageData(url) {
   });
 }
 
+/**
+ * Appends a stylesheet to the document.
+ * @param {string} css
+ */
 export function injectCSS(css) {
   // https://stackoverflow.com/q/3922139
   const style = document.createElement('style');

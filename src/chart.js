@@ -6,6 +6,22 @@
  */
 import {spritingOff, spritingOn} from './spriting.js';
 
+/**
+ * The chart.js types are used type-only: the constructor itself is injected
+ * through `setup({Chart})`, so chart.js is not a runtime dependency here. A
+ * consumer of this package always has chart.js -- that is what it is for.
+ * @typedef {import('chart.js').Chart} ChartInstance
+ * @typedef {typeof import('chart.js').Chart} ChartConstructor
+ * @typedef {object} AcquireOptions
+ * @property {object} [canvas] - Canvas attributes.
+ * @property {object} [wrapper] - Canvas wrapper attributes.
+ * @property {boolean} [useOffscreenCanvas] - use an OffscreenCanvas instead of the normal HTMLCanvasElement.
+ * @property {boolean} [useShadowDOM] - use shadowDom.
+ * @property {boolean} [spriteText] - draw text from a bitmap sprite sheet.
+ * @property {boolean} [persistent] - If true, the chart will not be released after the spec.
+ * @typedef {{skip: (reason?: string) => void}} TestContext
+ */
+
 // Every chart acquired by a spec, so they can all be released afterwards.
 const charts = {};
 
@@ -13,12 +29,13 @@ let Chart;
 
 /**
  * Registers the Chart.js constructor used to build charts. Called by `setup()`.
- * @param {Function} chartConstructor - the `Chart` export of chart.js
+ * @param {ChartConstructor} chartConstructor - the `Chart` export of chart.js
  */
 export function useChart(chartConstructor) {
   Chart = chartConstructor;
 }
 
+/** @returns {ChartConstructor} the registered Chart.js constructor */
 export function getChart() {
   return Chart;
 }
@@ -65,14 +82,9 @@ function acquireContext(canvas, options) {
  * Injects a new canvas (and div wrapper) and creates the associated Chart instance
  * using the given config. Additional options allow tweaking elements generation.
  * @param {object} [config] - Chart config.
- * @param {object} [options] - Chart acquisition options.
- * @param {object} [options.canvas] - Canvas attributes.
- * @param {object} [options.wrapper] - Canvas wrapper attributes.
- * @param {boolean} [options.useOffscreenCanvas] - use an OffscreenCanvas instead of the normal HTMLCanvasElement.
- * @param {boolean} [options.useShadowDOM] - use shadowDom
- * @param {boolean} [options.spriteText] - draw text from a bitmap sprite sheet.
- * @param {boolean} [options.persistent] - If true, the chart will not be released after the spec.
- * @param {object} [ctx] - Vitest test context, required by options that may be unsupported.
+ * @param {AcquireOptions} [options] - Chart acquisition options.
+ * @param {TestContext} [ctx] - Vitest test context, required by options that may be unsupported.
+ * @returns {ChartInstance} the chart
  */
 export function buildChart(config = {}, options = {}, ctx) {
   if (!Chart) {
@@ -116,6 +128,7 @@ export function buildChart(config = {}, options = {}, ctx) {
   return chart;
 }
 
+/** @param {ChartInstance} chart */
 export function destroyChart(chart) {
   spritingOff(chart.ctx);
   chart.destroy();
@@ -124,12 +137,23 @@ export function destroyChart(chart) {
   wrapper?.parentNode?.removeChild(wrapper);
 }
 
+/**
+ * Builds a chart and registers it for release after the spec.
+ * @param {object} [config] - Chart config.
+ * @param {AcquireOptions} [options] - Chart acquisition options.
+ * @param {TestContext} [ctx] - Vitest test context, required by options that may be unsupported.
+ * @returns {ChartInstance} the chart
+ */
 export function acquireChart(config, options, ctx) {
   const chart = buildChart(config, options, ctx);
   charts[chart.id] = chart;
   return chart;
 }
 
+/**
+ * Destroys a chart and removes it from the registry.
+ * @param {ChartInstance} chart
+ */
 export function releaseChart(chart) {
   destroyChart(chart);
   delete charts[chart.id];
@@ -146,7 +170,12 @@ export function releaseCharts() {
   }
 }
 
-/** Runs `callback` once the chart has handled an event of the given type. */
+/**
+ * Runs `callback` once the chart has handled an event of the given type.
+ * @param {ChartInstance} chart
+ * @param {string} type - event type, e.g. `mousemove`
+ * @param {() => void} callback
+ */
 export function afterEvent(chart, type, callback) {
   const override = chart._eventHandler;
   chart._eventHandler = function (event) {
@@ -158,6 +187,11 @@ export function afterEvent(chart, type, callback) {
   };
 }
 
+/**
+ * Runs `callback` after the chart's next resize.
+ * @param {ChartInstance} chart
+ * @param {() => void} callback
+ */
 export function waitForResize(chart, callback) {
   const override = chart.resize;
   chart.resize = function (...args) {
@@ -179,7 +213,14 @@ function resolveElementPoint(el) {
   return {x: 0, y: 0};
 }
 
-/** Dispatches a mouse event at an element's position and awaits its handling. */
+/**
+ * Dispatches a mouse event at an element's position and awaits its handling.
+ * @param {ChartInstance} chart
+ * @param {string} type - event type, e.g. `mousemove`
+ * @param {{x?: number, y?: number, getCenterPoint?: () => {x: number, y: number}}} [el]
+ *   element to aim at; the chart's origin when omitted
+ * @returns {Promise<MouseEvent>} the dispatched event
+ */
 export async function triggerMouseEvent(chart, type, el) {
   const node = chart.canvas;
   const rect = node.getBoundingClientRect();

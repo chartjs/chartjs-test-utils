@@ -163,6 +163,21 @@ measurement rather than a stricter one, and every reference image this package
 has ever compared was captured against white. `checkerboard: true` opts a
 fixture in once its image has been re-validated.
 
+## Types
+
+The package ships type declarations, generated from the JSDoc in `src` by
+`npm run types` so they cannot drift from the implementation. Chart instances
+are typed as chart.js's own `Chart`, through a type-only import — chart.js is
+not a runtime dependency of this package, it is injected into `setup()`.
+
+The matchers are declared as an augmentation of Vitest's `Matchers` interface,
+so `expect(chart).toEqualImageData(...)` typechecks once the package is
+imported anywhere in the project. That part is hand-written in
+`types/entry.d.ts`, since a declaration emit cannot produce it; the mock
+context's recorded methods are declared there too, because the mock assigns
+them in a loop. A unit test compares both lists against the implementation, so
+they cannot fall behind it silently.
+
 ## Node
 
 `createMockContext()` records the calls a chart makes to a 2d context, and works
@@ -182,6 +197,7 @@ ctx.getCalls(); // [{name: 'fillRect', args: [1, 2, 3, 4]}]
 npm run lint       # biome check
 npm run format     # biome check --write
 npm run typecheck  # the Vitest configs, through tsconfig.tooling.json
+npm run types      # emit the declarations into types/generated
 npm test           # lint, typecheck, node specs, browser specs
 npm run dev        # the browser suite in watch mode
 npm run fixtures:update   # rewrite reference images from a Chromium render
