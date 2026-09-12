@@ -1,10 +1,10 @@
-import {expect, afterEach} from 'vitest';
-import Context from './context.js';
+import {afterEach, expect} from 'vitest';
 import {injectCSS} from './canvas.js';
-import {matchers} from './matchers.js';
 import {releaseCharts, useChart} from './chart.js';
+import Context from './context.js';
+import {matchers} from './matchers.js';
 
-export {createCanvas, createImageData, canvasFromImageData, readImageData, injectCSS} from './canvas.js';
+export {canvasFromImageData, createCanvas, createImageData, injectCSS, readImageData} from './canvas.js';
 export {
   acquireChart,
   afterEvent,
@@ -38,13 +38,14 @@ function injectWrapperCSS() {
   // some style initialization to limit differences between browsers across different platforms.
   injectCSS(
     '.chartjs-wrapper, .chartjs-wrapper canvas {' +
-    'border: 0;' +
-    'margin: 0;' +
-    'padding: 0;' +
-    '}' +
-    '.chartjs-wrapper {' +
-    'position: absolute' +
-    '}');
+      'border: 0;' +
+      'margin: 0;' +
+      'padding: 0;' +
+      '}' +
+      '.chartjs-wrapper {' +
+      'position: absolute' +
+      '}'
+  );
 }
 
 /**

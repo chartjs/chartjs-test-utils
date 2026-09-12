@@ -3,8 +3,8 @@ import {describe, it} from 'vitest';
 
 import {createMockContext} from '../../src/index.js';
 
-describe('createMockContext', function() {
-  it('should record calls and property assignments', function() {
+describe('createMockContext', () => {
+  it('should record calls and property assignments', () => {
     const ctx = createMockContext();
 
     ctx.fillStyle = 'red';
@@ -17,7 +17,7 @@ describe('createMockContext', function() {
     assert.strictEqual(ctx.fillStyle, 'red');
   });
 
-  it('should measure text with a fixed width', function() {
+  it('should measure text with a fixed width', () => {
     const ctx = createMockContext();
 
     assert.strictEqual(ctx.measureText('abc').width, 30);

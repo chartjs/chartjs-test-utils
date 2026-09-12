@@ -61,7 +61,7 @@ function compareObject(actual, expected, path = '') {
   }
 
   if (path !== '') {
-    path = path + '.';
+    path = `${path}.`;
   }
 
   for (const key in expected) {

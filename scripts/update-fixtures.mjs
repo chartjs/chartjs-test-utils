@@ -8,10 +8,9 @@
  */
 import {spawnSync} from 'node:child_process';
 
-const result = spawnSync(
-  'npx',
-  ['vitest', 'run', '--config', 'vitest.browser.config.ts', ...process.argv.slice(2)],
-  {env: {...process.env, UPDATE_FIXTURES: '1'}, stdio: 'inherit'}
-);
+const result = spawnSync('npx', ['vitest', 'run', '--config', 'vitest.browser.config.ts', ...process.argv.slice(2)], {
+  env: {...process.env, UPDATE_FIXTURES: '1'},
+  stdio: 'inherit'
+});
 
 process.exitCode = result.status ?? 1;

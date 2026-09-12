@@ -5,9 +5,10 @@
  * the browser bundle must never pull in. Import it from the Vitest browser
  * config, which runs in node.
  */
-import {defineBrowserCommand} from '@vitest/browser';
+
 import {writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {defineBrowserCommand} from '@vitest/browser';
 
 /**
  * Builds the `saveFixtureImage` browser command.
@@ -36,7 +37,7 @@ export function createSaveFixtureImage({dir = 'test/fixtures'} = {}) {
   return defineBrowserCommand((_context, name, dataUrl) => {
     const file = resolve(process.cwd(), dir, `${name}.png`);
     writeFileSync(file, Buffer.from(dataUrl.split(',')[1], 'base64'));
-    // eslint-disable-next-line no-console
+    // biome-ignore lint/suspicious/noConsole: telling the developer which image was rewritten
     console.log(`updated ${file}`);
   });
 }

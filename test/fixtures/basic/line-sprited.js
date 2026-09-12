@@ -4,12 +4,14 @@ export default {
     type: 'line',
     data: {
       labels: ['a', 'b', 'c', 'd'],
-      datasets: [{
-        data: [1, 3, 2, 4],
-        borderColor: '#ff6384',
-        borderWidth: 2,
-        pointRadius: 3
-      }]
+      datasets: [
+        {
+          data: [1, 3, 2, 4],
+          borderColor: '#ff6384',
+          borderWidth: 2,
+          pointRadius: 3
+        }
+      ]
     },
     options: {
       scales: {

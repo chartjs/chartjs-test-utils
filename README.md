@@ -175,3 +175,18 @@ const ctx = createMockContext();
 ctx.fillRect(1, 2, 3, 4);
 ctx.getCalls(); // [{name: 'fillRect', args: [1, 2, 3, 4]}]
 ```
+
+## Development
+
+```sh
+npm run lint       # biome check
+npm run format     # biome check --write
+npm run typecheck  # the Vitest configs, through tsconfig.tooling.json
+npm test           # lint, typecheck, node specs, browser specs
+npm run dev        # the browser suite in watch mode
+npm run fixtures:update   # rewrite reference images from a Chromium render
+```
+
+Lint and formatting are Biome's, configured in `biome.jsonc`. `src/spriting.js`
+is the one file with a rule exception, explained in that config: it is a port of
+the 0.5.0 sprite sheet and is kept diffable against it.

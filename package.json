@@ -13,7 +13,8 @@
   "scripts": {
     "dev": "vitest --config vitest.browser.config.ts",
     "fixtures:update": "node scripts/update-fixtures.mjs",
-    "lint": "eslint --ext .js,.mjs src test scripts",
+    "format": "biome check --write",
+    "lint": "biome check",
     "test": "npm run lint && npm run typecheck && npm run test:unit && npm run test:browser",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "test:unit": "vitest run --config vitest.config.ts",
@@ -40,12 +41,11 @@
   },
   "homepage": "https://github.com/chartjs/chartjs-test-utils#readme",
   "devDependencies": {
+    "@biomejs/biome": "^2.5.13",
     "@types/node": "^26.5.1",
     "@vitest/browser": "^5.0.0",
     "@vitest/browser-playwright": "^5.0.0",
     "chart.js": "^4.5.0",
-    "eslint": "^8.57.1",
-    "eslint-config-chartjs": "^0.3.0",
     "playwright": "^1.63.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"

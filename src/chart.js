@@ -32,11 +32,15 @@ function skip(ctx, reason) {
   if (ctx && typeof ctx.skip === 'function') {
     return ctx.skip(reason);
   }
-  throw new Error(`${reason}. Pass the test context to acquireChart to skip instead: it('...', (ctx) => acquireChart(config, options, ctx))`);
+  throw new Error(
+    `${reason}. Pass the test context to acquireChart to skip instead: it('...', (ctx) => acquireChart(config, options, ctx))`
+  );
 }
 
 function applyAttributes(node, attributes) {
-  Object.keys(attributes).forEach((key) => node.setAttribute(key, attributes[key]));
+  for (const key of Object.keys(attributes)) {
+    node.setAttribute(key, attributes[key]);
+  }
 }
 
 /**
@@ -54,9 +58,7 @@ function checkSupport(options, ctx) {
 }
 
 function acquireContext(canvas, options) {
-  return options.useOffscreenCanvas
-    ? canvas.transferControlToOffscreen().getContext('2d')
-    : canvas.getContext('2d');
+  return options.useOffscreenCanvas ? canvas.transferControlToOffscreen().getContext('2d') : canvas.getContext('2d');
 }
 
 /**
@@ -118,10 +120,8 @@ export function destroyChart(chart) {
   spritingOff(chart.ctx);
   chart.destroy();
 
-  const wrapper = (chart.$test || {}).wrapper;
-  if (wrapper && wrapper.parentNode) {
-    wrapper.parentNode.removeChild(wrapper);
-  }
+  const wrapper = chart.$test?.wrapper;
+  wrapper?.parentNode?.removeChild(wrapper);
 }
 
 export function acquireChart(config, options, ctx) {
@@ -137,23 +137,22 @@ export function releaseChart(chart) {
 
 /** Releases every chart acquired since the last call, except persistent ones. */
 export function releaseCharts() {
-  Object.keys(charts).forEach((id) => {
+  for (const id of Object.keys(charts)) {
     const chart = charts[id];
-    if (!(chart.$test || {}).persistent) {
+    if (!chart.$test?.persistent) {
       destroyChart(chart);
       delete charts[id];
     }
-  });
+  }
 }
 
 /** Runs `callback` once the chart has handled an event of the given type. */
 export function afterEvent(chart, type, callback) {
   const override = chart._eventHandler;
-  chart._eventHandler = function(event) {
+  chart._eventHandler = function (event) {
     override.call(this, event);
     if (event.type === type || (event.native && event.native.type === type)) {
       chart._eventHandler = override;
-      // eslint-disable-next-line callback-return
       callback();
     }
   };
@@ -161,10 +160,9 @@ export function afterEvent(chart, type, callback) {
 
 export function waitForResize(chart, callback) {
   const override = chart.resize;
-  chart.resize = function(...args) {
+  chart.resize = function (...args) {
     chart.resize = override;
     override.apply(this, args);
-    // eslint-disable-next-line callback-return
     callback();
   };
 }

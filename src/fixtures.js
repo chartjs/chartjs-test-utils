@@ -38,8 +38,12 @@ function collect(configs, images, prefix) {
     inputs[name][key] = value;
   };
 
-  Object.keys(configs).forEach((path) => add(path, 'config', configs[path]));
-  Object.keys(images).forEach((path) => add(path, 'png', images[path]));
+  for (const path of Object.keys(configs)) {
+    add(path, 'config', configs[path]);
+  }
+  for (const path of Object.keys(images)) {
+    add(path, 'png', images[path]);
+  }
   return inputs;
 }
 
@@ -76,7 +80,7 @@ async function compareOrSave(chart, name, inputs, json, save) {
 }
 
 function specFromFixture(name, inputs) {
-  it(name, async(ctx) => {
+  it(name, async (ctx) => {
     const save = (await browserCommands()).saveFixtureImage;
     const json = inputs.config;
     if (!json) {
@@ -89,7 +93,7 @@ function specFromFixture(name, inputs) {
 
     const chart = acquireChart(prepareConfig(name, json), json.options, ctx);
     try {
-      const run = json.options && json.options.run;
+      const run = json.options?.run;
       if (typeof run === 'function') {
         await run(chart);
       }
@@ -135,7 +139,9 @@ export function createFixtures({configs, images, prefix = ''}) {
       if (names.length === 0) {
         throw new Error(`No fixtures found under ${prefix}${path}`);
       }
-      names.forEach((name) => specFromFixture(name, fixtures[name]));
+      for (const name of names) {
+        specFromFixture(name, fixtures[name]);
+      }
     };
   }
 

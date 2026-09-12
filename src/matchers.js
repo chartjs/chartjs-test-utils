@@ -26,7 +26,7 @@ function resolveContext(actual) {
   // A Chart instance. `instanceof Chart` only works when the consumer and the
   // chart under test resolve to the same chart.js copy, the canvas check does
   // not care.
-  return actual && actual.ctx instanceof CanvasRenderingContext2D ? actual.ctx : null;
+  return actual?.ctx instanceof CanvasRenderingContext2D ? actual.ctx : null;
 }
 
 /**
@@ -38,7 +38,7 @@ function logPreview(description, images) {
   const urls = images.map(({data}) => canvasFromImageData(data).toDataURL());
   // The preview is the point of this function: Karma appended it to its
   // reporter, a browser test has the console instead.
-  // eslint-disable-next-line no-console
+  // biome-ignore lint/suspicious/noConsole: the preview is what this function is for
   console.log(
     `%c ${description}\n${images.map(({label}) => label).join(' | ')}\n%c %c %c `,
     'font: 12px monospace',
@@ -54,7 +54,7 @@ export function toBeCloseToPixel(actual, expected) {
     const A = Math.abs(actual);
     const B = Math.abs(expected);
     const percentDiff = 0.005; // 0.5% diff
-    pass = (diff <= (A > B ? A : B) * percentDiff) || diff < 2; // 2 pixels is fine
+    pass = diff <= (A > B ? A : B) * percentDiff || diff < 2; // 2 pixels is fine
   }
 
   return {
@@ -83,7 +83,7 @@ export function toBeValidChart(actual) {
   let message = null;
 
   if (Chart && !(actual instanceof Chart)) {
-    message = 'Expected ' + actual + ' to be an instance of Chart';
+    message = `Expected ${actual} to be an instance of Chart`;
   } else if (Object.prototype.toString.call(actual.canvas) !== '[object HTMLCanvasElement]') {
     message = 'Expected canvas to be an instance of HTMLCanvasElement';
   } else if (Object.prototype.toString.call(actual.ctx) !== '[object CanvasRenderingContext2D]') {
@@ -95,7 +95,7 @@ export function toBeValidChart(actual) {
   }
 
   return {
-    message: () => message || 'Expected ' + actual + ' to be valid chart',
+    message: () => message || `Expected ${actual} to be valid chart`,
     pass: !message
   };
 }
@@ -119,24 +119,24 @@ export function toBeChartOfSize(actual, expected) {
 
   // sanity checks
   if (actual.height !== orh) {
-    message = 'Expected chart height ' + actual.height + ' to be equal to original render height ' + orh;
+    message = `Expected chart height ${actual.height} to be equal to original render height ${orh}`;
   } else if (actual.width !== orw) {
-    message = 'Expected chart width ' + actual.width + ' to be equal to original render width ' + orw;
+    message = `Expected chart width ${actual.width} to be equal to original render width ${orw}`;
   }
 
   // validity checks
   if (dh !== expected.dh) {
-    message = 'Expected display height ' + dh + ' to be equal to ' + expected.dh;
+    message = `Expected display height ${dh} to be equal to ${expected.dh}`;
   } else if (dw !== expected.dw) {
-    message = 'Expected display width ' + dw + ' to be equal to ' + expected.dw;
+    message = `Expected display width ${dw} to be equal to ${expected.dw}`;
   } else if (rh !== expected.rh) {
-    message = 'Expected render height ' + rh + ' to be equal to ' + expected.rh;
+    message = `Expected render height ${rh} to be equal to ${expected.rh}`;
   } else if (rw !== expected.rw) {
-    message = 'Expected render width ' + rw + ' to be equal to ' + expected.rw;
+    message = `Expected render width ${rw} to be equal to ${expected.rw}`;
   }
 
   return {
-    message: () => message || 'Expected ' + actual + ' to be a chart of size ' + JSON.stringify(expected),
+    message: () => message || `Expected ${actual} to be a chart of size ${JSON.stringify(expected)}`,
     pass: !message
   };
 }
@@ -178,9 +178,10 @@ export function toEqualImageData(actual, expected, opts = {}) {
 
   const actualData = ctx.getImageData(0, 0, actualWidth, actualHeight);
   const diffData = createImageData(width, height);
-  const count = actualWidth === width && actualHeight === height
-    ? pixelmatch(actualData.data, expected.data, diffData.data, width, height, {checkerboard, threshold})
-    : Math.abs(actualWidth * actualHeight - width * height);
+  const count =
+    actualWidth === width && actualHeight === height
+      ? pixelmatch(actualData.data, expected.data, diffData.data, width, height, {checkerboard, threshold})
+      : Math.abs(actualWidth * actualHeight - width * height);
   const ratio = count / (width * height);
   const pass = ratio <= tolerance && !opts.debug;
 
@@ -193,7 +194,8 @@ export function toEqualImageData(actual, expected, opts = {}) {
   }
 
   return {
-    message: () => 'Expected the rendered canvas to match the reference image.\n' +
+    message: () =>
+      'Expected the rendered canvas to match the reference image.\n' +
       `  Size: ${actualWidth}x${actualHeight}, expected ${width}x${height}\n` +
       `  Difference: ${count}px / ${toPercent(ratio)}%\n` +
       `  Threshold: ${toPercent(threshold)}%, tolerance: ${toPercent(tolerance)}%`,

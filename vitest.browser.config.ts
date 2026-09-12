@@ -34,9 +34,7 @@ export default defineConfig({
       commands: updating ? {saveFixtureImage: createSaveFixtureImage()} : {},
       enabled: true,
       headless: true,
-      instances: updating
-        ? [{browser: 'chromium'}]
-        : [{browser: 'chromium'}, {browser: 'firefox'}],
+      instances: updating ? [{browser: 'chromium'}] : [{browser: 'chromium'}, {browser: 'firefox'}],
       provider: playwright({
         launchOptions: {args: chromiumArgs, firefoxUserPrefs: firefoxPrefs}
       }),
