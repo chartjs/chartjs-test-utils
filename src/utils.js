@@ -1,4 +1,4 @@
-import {spritingOn, spritingOff} from './spriting';
+import {spritingOff, spritingOn} from './spriting';
 
 export function createCanvas(w, h) {
   var canvas = document.createElement('canvas');
@@ -10,7 +10,7 @@ export function createCanvas(w, h) {
 export function readImageData(url, callback) {
   var image = new Image();
 
-  image.onload = function() {
+  image.onload = function () {
     var h = image.height;
     var w = image.width;
     var canvas = createCanvas(w, h);
@@ -119,7 +119,8 @@ export function injectCSS(css) {
   var head = document.getElementsByTagName('head')[0];
   var style = document.createElement('style');
   style.setAttribute('type', 'text/css');
-  if (style.styleSheet) { // IE
+  if (style.styleSheet) {
+    // IE
     style.styleSheet.cssText = css;
   } else {
     style.appendChild(document.createTextNode(css));
@@ -129,7 +130,7 @@ export function injectCSS(css) {
 
 export function waitForResize(chart, callback) {
   var override = chart.resize;
-  chart.resize = function() {
+  chart.resize = function () {
     chart.resize = override;
     override.apply(this, arguments);
     callback();
@@ -138,7 +139,7 @@ export function waitForResize(chart, callback) {
 
 export function afterEvent(chart, type, callback) {
   var override = chart._eventHandler;
-  chart._eventHandler = function(event) {
+  chart._eventHandler = function (event) {
     override.call(this, event);
     if (event.type === type || (event.native && event.native.type === type)) {
       chart._eventHandler = override;
