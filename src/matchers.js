@@ -1,8 +1,6 @@
-'use strict';
-
 import pixelmatch from 'pixelmatch';
-import {createCanvas} from './utils';
 import {toEqualOptions} from './matchers.options';
+import {createCanvas} from './utils';
 
 function toPercent(value) {
   return Math.round(value * 10000) / 100;
@@ -31,13 +29,23 @@ function buildPixelMatchPreview(actual, expected, diff, threshold, tolerance, co
   [
     {data: actual, label: 'Actual'},
     {data: expected, label: 'Expected'},
-    {data: diff, label:
-			'diff: ' + count + 'px ' +
-			'(' + toPercent(ratio) + '%)<br/>' +
-			'thr: ' + toPercent(threshold) + '%, ' +
-			'tol: ' + toPercent(tolerance) + '%'
+    {
+      data: diff,
+      label:
+        'diff: ' +
+        count +
+        'px ' +
+        '(' +
+        toPercent(ratio) +
+        '%)<br/>' +
+        'thr: ' +
+        toPercent(threshold) +
+        '%, ' +
+        'tol: ' +
+        toPercent(tolerance) +
+        '%'
     }
-  ].forEach(function(values) {
+  ].forEach(function (values) {
     var item = document.createElement('div');
     item.style.cssText = 'text-align: center; font: 12px monospace; line-height: 1.4; margin: 8px';
     item.innerHTML = '<div style="margin: 8px; height: 32px">' + values.label + '</div>';
@@ -57,7 +65,7 @@ function buildPixelMatchPreview(actual, expected, diff, threshold, tolerance, co
 
 function toBeCloseToPixel() {
   return {
-    compare: function(actual, expected) {
+    compare: function (actual, expected) {
       var result = false;
 
       if (!isNaN(actual) && !isNaN(expected)) {
@@ -65,7 +73,7 @@ function toBeCloseToPixel() {
         var A = Math.abs(actual);
         var B = Math.abs(expected);
         var percentDiff = 0.005; // 0.5% diff
-        result = (diff <= (A > B ? A : B) * percentDiff) || diff < 2; // 2 pixels is fine
+        result = diff <= (A > B ? A : B) * percentDiff || diff < 2; // 2 pixels is fine
       }
 
       return {pass: result};
@@ -78,7 +86,7 @@ function toBeCloseToPoint() {
     return Math.round(v * 100) / 100;
   }
   return {
-    compare: function(actual, expected) {
+    compare: function (actual, expected) {
       return {
         pass: rnd(actual.x) === rnd(expected.x) && rnd(actual.y) === rnd(expected.y)
       };
@@ -88,7 +96,7 @@ function toBeCloseToPoint() {
 
 function toEqualOneOf() {
   return {
-    compare: function(actual, expecteds) {
+    compare: function (actual, expecteds) {
       var result = false;
       for (var i = 0, l = expecteds.length; i < l; i++) {
         if (actual === expecteds[i]) {
@@ -105,7 +113,7 @@ function toEqualOneOf() {
 
 function toBeValidChart() {
   return {
-    compare: function(actual) {
+    compare: function (actual) {
       var message = null;
 
       if (!(actual instanceof Chart)) {
@@ -130,7 +138,7 @@ function toBeValidChart() {
 
 function toBeChartOfSize() {
   return {
-    compare: function(actual, expected) {
+    compare: function (actual, expected) {
       var res = toBeValidChart().compare(actual);
       if (!res.pass) {
         return res;
@@ -175,7 +183,7 @@ function toBeChartOfSize() {
 
 function toEqualImageData() {
   return {
-    compare: function(actual, expected, opts) {
+    compare: function (actual, expected, opts) {
       var message = null;
       var debug = opts.debug || false;
       var tolerance = opts.tolerance === undefined ? 0.001 : opts.tolerance;
@@ -204,7 +212,7 @@ function toEqualImageData() {
         }
         ratio = count / (w * h);
 
-        if ((ratio > tolerance) || debug) {
+        if (ratio > tolerance || debug) {
           message = buildPixelMatchPreview(idata, expected, ddata, threshold, tolerance, count, opts.description);
         }
       } else {

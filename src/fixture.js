@@ -1,8 +1,8 @@
-import {readImageData, _acquireChart, _releaseChart} from './utils';
+import {_acquireChart, _releaseChart, readImageData} from './utils';
 
 function readFile(url, callback) {
   var request = new XMLHttpRequest();
-  request.onreadystatechange = function() {
+  request.onreadystatechange = function () {
     if (request.readyState === 4) {
       return callback(request.responseText);
     }
@@ -18,15 +18,15 @@ function loadConfig(url, callback) {
   var type = matches ? matches[1] : 'json';
   var cfg = null;
 
-  readFile(url, function(content) {
+  readFile(url, function (content) {
     switch (type) {
-    case 'js':
-      cfg = new Function('"use strict"; var module = {};' + content + '; return module.exports || fixture;')();
-      break;
-    case 'json':
-      cfg = JSON.parse(content);
-      break;
-    default:
+      case 'js':
+        cfg = new Function('"use strict"; var module = {};' + content + '; return module.exports || fixture;')();
+        break;
+      case 'json':
+        cfg = JSON.parse(content);
+        break;
+      default:
     }
 
     callback(cfg);
@@ -35,12 +35,18 @@ function loadConfig(url, callback) {
 
 function specFromFixture(description, inputs) {
   var input = inputs.js || inputs.json;
-  it(input, function(done) {
-    loadConfig(input, function(json) {
-      var descr = json.description || (json.description = description);
+  it(input, function (done) {
+    loadConfig(input, function (json) {
+      if (!json.description) {
+        json.description = description;
+      }
+      var descr = json.description;
 
       var config = json.config;
-      var options = config.options || (config.options = {});
+      if (!config.options) {
+        config.options = {};
+      }
+      var options = config.options;
 
       // plugins are disabled by default, except if the path contains 'plugin' or there are instance plugins
       if (input.indexOf('plugin') === -1 && config.plugins === undefined) {
@@ -54,7 +60,7 @@ function specFromFixture(description, inputs) {
           done();
         }
 
-        readImageData(inputs.png, function(expected) {
+        readImageData(inputs.png, function (expected) {
           expect(chart).toEqualImageData(expected, json);
           _releaseChart(chart);
           done();
@@ -74,7 +80,7 @@ export function specsFromFixtures(path) {
   var regex = new RegExp('(^/base/test/fixtures/' + path + '.+)\\.(png|json|js)');
   var inputs = {};
 
-  Object.keys(__karma__.files || {}).forEach(function(file) {
+  Object.keys(__karma__.files || {}).forEach(function (file) {
     var matches = file.match(regex);
     var name = matches && matches[1];
     var type = matches && matches[2];
@@ -85,8 +91,8 @@ export function specsFromFixtures(path) {
     }
   });
 
-  return function() {
-    Object.keys(inputs).forEach(function(key) {
+  return function () {
+    Object.keys(inputs).forEach(function (key) {
       specFromFixture(key, inputs[key]);
     });
   };

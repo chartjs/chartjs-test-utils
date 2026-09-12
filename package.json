@@ -7,7 +7,8 @@
   "module": "dist/chartjs-test-utils.js",
   "scripts": {
     "build": "rollup -c",
-    "lint": "eslint src/**/*.js",
+    "format": "biome check --write",
+    "lint": "biome check",
     "test": "npm run lint && npx mocha -r esm"
   },
   "repository": {
@@ -31,11 +32,9 @@
   },
   "homepage": "https://github.com/chartjs/chartjs-test-utils#readme",
   "devDependencies": {
+    "@biomejs/biome": "^2.5.13",
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-node-resolve": "^14.1.0",
-    "eslint": "^8.21.0",
-    "eslint-config-chartjs": "^0.3.0",
-    "eslint-plugin-es": "^4.1.0",
     "esm": "^3.2.25",
     "mocha": "^10.0.0",
     "rollup": "^2.77.2"
