@@ -190,3 +190,28 @@ npm run fixtures:update   # rewrite reference images from a Chromium render
 Lint and formatting are Biome's, configured in `biome.jsonc`. `src/spriting.js`
 is the one file with a rule exception, explained in that config: it is a port of
 the 0.5.0 sprite sheet and is kept diffable against it.
+
+## Releases
+
+Releases are made by [semantic-release](https://semantic-release.gitbook.io/)
+from `master`: it decides the version, writes the release notes, tags, and
+publishes to npm. Nothing is released by hand, and `package.json` carries
+`0.0.0-development` — the published version is set during the release.
+
+This repository merges pull requests by squash, and the squash commit takes the
+**pull request title**. The title is therefore what decides the next version:
+
+| Pull request title | Release |
+| --- | --- |
+| `fix: ...`, `perf: ...` | patch |
+| `feat: ...` | minor |
+| `feat!: ...`, or any type with a `BREAKING CHANGE:` footer | major |
+| `docs:`, `test:`, `chore:`, `refactor:`, `revert:`, `ci:`, `build:`, `style:` | none |
+
+Note `revert:` in the last row: reverting a released change does not itself
+release, so an actual rollback wants `fix:`.
+
+A workflow checks the title against this convention on every pull request, so a
+title that would not release — or would release the wrong thing — fails before
+review. The scope (`fix(matchers): ...`) is free text and does not affect the
+version.
