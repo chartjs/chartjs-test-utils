@@ -1,62 +1,86 @@
-import Context from './context';
-import matchers from './matchers';
-import {_acquireChart, _releaseChart, injectCSS} from './utils';
+import {expect, afterEach} from 'vitest';
+import Context from './context.js';
+import {injectCSS} from './canvas.js';
+import {matchers} from './matchers.js';
+import {releaseCharts, useChart} from './chart.js';
 
-export * from './fixture';
-export {afterEvent, triggerMouseEvent, waitForResize} from './utils';
-
-// Keep track of all acquired charts to automatically release them after each specs
-var charts = {};
-
-/**
- * Injects a new canvas (and div wrapper) and creates the associated Chart instance
- * using the given config. Additional options allow tweaking elements generation.
- * @param {object} [config] - Chart config.
- * @param {object} [options] - Chart acquisition options.
- * @param {object} [options.canvas] - Canvas attributes.
- * @param {object} [options.wrapper] - Canvas wrapper attributes.
- * @param {boolean} [options.useOffscreenCanvas] - use an OffscreenCanvas instead of the normal HTMLCanvasElement.
- * @param {boolean} [options.useShadowDOM] - use shadowDom
- * @param {boolean} [options.persistent] - If true, the chart will not be released after the spec.
- */
-export function acquireChart(config, options) {
-  var chart = _acquireChart(config, options);
-  charts[chart.id] = chart;
-  return chart;
-}
-
-export function releaseChart(chart) {
-  _releaseChart(chart);
-  delete charts[chart.id];
-}
+export {createCanvas, createImageData, canvasFromImageData, readImageData, injectCSS} from './canvas.js';
+export {
+  acquireChart,
+  afterEvent,
+  buildChart,
+  destroyChart,
+  releaseChart,
+  releaseCharts,
+  triggerMouseEvent,
+  waitForResize
+} from './chart.js';
+export {createFixtures} from './fixtures.js';
+export {
+  matchers,
+  toBeChartOfSize,
+  toBeCloseToPixel,
+  toBeCloseToPoint,
+  toBeValidChart,
+  toEqualImageData,
+  toEqualOneOf,
+  toEqualOptions
+} from './matchers.js';
+export {compareOptions} from './matchers.options.js';
+export {spritingOff, spritingOn} from './spriting.js';
+export {Context};
 
 export function createMockContext() {
   return new Context();
 }
 
-export function injectWrapperCSS() {
+function injectWrapperCSS() {
   // some style initialization to limit differences between browsers across different platforms.
   injectCSS(
     '.chartjs-wrapper, .chartjs-wrapper canvas {' +
-      'border: 0;' +
-      'margin: 0;' +
-      'padding: 0;' +
-      '}' +
-      '.chartjs-wrapper {' +
-      'position: absolute' +
-      '}'
-  );
+    'border: 0;' +
+    'margin: 0;' +
+    'padding: 0;' +
+    '}' +
+    '.chartjs-wrapper {' +
+    'position: absolute' +
+    '}');
 }
 
-export function addMatchers() {
-  jasmine.addMatchers(matchers);
-}
+/**
+ * Registers the matchers, the per-spec chart cleanup and the rendering defaults
+ * the reference images were captured with. Call it once, from a setup file.
+ *
+ * @param {object} options
+ * @param {Function} options.Chart - the `Chart` export of chart.js. Injected
+ *   rather than read from a global: Karma loaded the UMD bundle into `window`,
+ *   a bundler does not.
+ * @param {number} [options.devicePixelRatio] - pinned to 1 by default, so the
+ *   backing store matches the reference images whatever the display reports.
+ * @param {boolean} [options.wrapperCSS] - inject the chart wrapper stylesheet.
+ *
+ * @example
+ * import {Chart, registerables} from 'chart.js';
+ * import {setup} from 'chartjs-test-utils';
+ *
+ * Chart.register(...registerables);
+ * setup({Chart});
+ */
+export function setup({Chart, devicePixelRatio = 1, wrapperCSS = true} = {}) {
+  if (!Chart) {
+    throw new Error('setup() requires the Chart.js constructor: setup({Chart})');
+  }
 
-export function releaseCharts() {
-  Object.keys(charts).forEach(function (id) {
-    var chart = charts[id];
-    if (!(chart.$test || {}).persistent) {
-      _releaseChart(chart);
-    }
+  useChart(Chart);
+  Chart.defaults.devicePixelRatio = devicePixelRatio;
+
+  if (wrapperCSS) {
+    injectWrapperCSS();
+  }
+
+  expect.extend(matchers);
+
+  afterEach(() => {
+    releaseCharts();
   });
 }

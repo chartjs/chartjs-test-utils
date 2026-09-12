@@ -1,238 +1,222 @@
+/**
+ * The Vitest matchers.
+ *
+ * Jasmine's `addMatchers` took factories returning a `compare` method; Vitest's
+ * `expect.extend` takes the comparison itself and wants a lazy `message`.
+ */
 import pixelmatch from 'pixelmatch';
-import {toEqualOptions} from './matchers.options';
-import {createCanvas} from './utils';
+import {canvasFromImageData, createImageData} from './canvas.js';
+import {getChart} from './chart.js';
+import {compareOptions} from './matchers.options.js';
+
+const DEFAULT_THRESHOLD = 0.1;
+const DEFAULT_TOLERANCE = 0.001;
 
 function toPercent(value) {
   return Math.round(value * 10000) / 100;
 }
 
-function createImageData(w, h) {
-  var canvas = createCanvas(w, h);
-  var context = canvas.getContext('2d');
-  return context.getImageData(0, 0, w, h);
-}
-
-function canvasFromImageData(data) {
-  var canvas = createCanvas(data.width, data.height);
-  var context = canvas.getContext('2d');
-  context.putImageData(data, 0, 0);
-  return canvas;
-}
-
-function buildPixelMatchPreview(actual, expected, diff, threshold, tolerance, count, description) {
-  var ratio = count / (actual.width * actual.height);
-  var wrapper = document.createElement('div');
-  wrapper.appendChild(document.createTextNode(description));
-
-  wrapper.style.cssText = 'display: flex; overflow-y: auto';
-
-  [
-    {data: actual, label: 'Actual'},
-    {data: expected, label: 'Expected'},
-    {
-      data: diff,
-      label:
-        'diff: ' +
-        count +
-        'px ' +
-        '(' +
-        toPercent(ratio) +
-        '%)<br/>' +
-        'thr: ' +
-        toPercent(threshold) +
-        '%, ' +
-        'tol: ' +
-        toPercent(tolerance) +
-        '%'
-    }
-  ].forEach(function (values) {
-    var item = document.createElement('div');
-    item.style.cssText = 'text-align: center; font: 12px monospace; line-height: 1.4; margin: 8px';
-    item.innerHTML = '<div style="margin: 8px; height: 32px">' + values.label + '</div>';
-    var canvas = canvasFromImageData(values.data);
-    canvas.style.cssText = 'border: 1px dashed red';
-    item.appendChild(canvas);
-    wrapper.appendChild(item);
-  });
-
-  wrapper.toString = () => `Fixture test failed:
-  Difference: ${count}px / ${toPercent(ratio)}%
-  Threshold: ${toPercent(threshold)}%
-  Tolerance: ${toPercent(tolerance)}%`;
-
-  return wrapper;
-}
-
-function toBeCloseToPixel() {
-  return {
-    compare: function (actual, expected) {
-      var result = false;
-
-      if (!isNaN(actual) && !isNaN(expected)) {
-        var diff = Math.abs(actual - expected);
-        var A = Math.abs(actual);
-        var B = Math.abs(expected);
-        var percentDiff = 0.005; // 0.5% diff
-        result = diff <= (A > B ? A : B) * percentDiff || diff < 2; // 2 pixels is fine
-      }
-
-      return {pass: result};
-    }
-  };
-}
-
-function toBeCloseToPoint() {
-  function rnd(v) {
-    return Math.round(v * 100) / 100;
+function resolveContext(actual) {
+  if (actual instanceof CanvasRenderingContext2D) {
+    return actual;
   }
+  if (actual instanceof HTMLCanvasElement) {
+    return actual.getContext('2d');
+  }
+  // A Chart instance. `instanceof Chart` only works when the consumer and the
+  // chart under test resolve to the same chart.js copy, the canvas check does
+  // not care.
+  return actual && actual.ctx instanceof CanvasRenderingContext2D ? actual.ctx : null;
+}
+
+/**
+ * Logs the actual, expected and diff images to the browser console, where they
+ * can be inspected in the Vitest UI. Replaces the DOM preview Karma appended to
+ * its reporter.
+ */
+function logPreview(description, images) {
+  const urls = images.map(({data}) => canvasFromImageData(data).toDataURL());
+  // The preview is the point of this function: Karma appended it to its
+  // reporter, a browser test has the console instead.
+  // eslint-disable-next-line no-console
+  console.log(
+    `%c ${description}\n${images.map(({label}) => label).join(' | ')}\n%c %c %c `,
+    'font: 12px monospace',
+    ...urls.map((url) => `padding: 128px 128px; background: url(${url}) no-repeat center/contain`)
+  );
+}
+
+export function toBeCloseToPixel(actual, expected) {
+  let pass = false;
+
+  if (!isNaN(actual) && !isNaN(expected)) {
+    const diff = Math.abs(actual - expected);
+    const A = Math.abs(actual);
+    const B = Math.abs(expected);
+    const percentDiff = 0.005; // 0.5% diff
+    pass = (diff <= (A > B ? A : B) * percentDiff) || diff < 2; // 2 pixels is fine
+  }
+
   return {
-    compare: function (actual, expected) {
-      return {
-        pass: rnd(actual.x) === rnd(expected.x) && rnd(actual.y) === rnd(expected.y)
-      };
-    }
+    message: () => `Expected ${actual} to be close to pixel ${expected}`,
+    pass
   };
 }
 
-function toEqualOneOf() {
+export function toBeCloseToPoint(actual, expected) {
+  const rnd = (v) => Math.round(v * 100) / 100;
   return {
-    compare: function (actual, expecteds) {
-      var result = false;
-      for (var i = 0, l = expecteds.length; i < l; i++) {
-        if (actual === expecteds[i]) {
-          result = true;
-          break;
-        }
-      }
-      return {
-        pass: result
-      };
-    }
+    message: () => `Expected ${JSON.stringify(actual)} to be close to point ${JSON.stringify(expected)}`,
+    pass: rnd(actual.x) === rnd(expected.x) && rnd(actual.y) === rnd(expected.y)
   };
 }
 
-function toBeValidChart() {
+export function toEqualOneOf(actual, expecteds) {
   return {
-    compare: function (actual) {
-      var message = null;
-
-      if (!(actual instanceof Chart)) {
-        message = 'Expected ' + actual + ' to be an instance of Chart';
-      } else if (Object.prototype.toString.call(actual.canvas) !== '[object HTMLCanvasElement]') {
-        message = 'Expected canvas to be an instance of HTMLCanvasElement';
-      } else if (Object.prototype.toString.call(actual.ctx) !== '[object CanvasRenderingContext2D]') {
-        message = 'Expected context to be an instance of CanvasRenderingContext2D';
-      } else if (typeof actual.height !== 'number' || !isFinite(actual.height)) {
-        message = 'Expected height to be a strict finite number';
-      } else if (typeof actual.width !== 'number' || !isFinite(actual.width)) {
-        message = 'Expected width to be a strict finite number';
-      }
-
-      return {
-        message: message ? message : 'Expected ' + actual + ' to be valid chart',
-        pass: !message
-      };
-    }
+    message: () => `Expected ${actual} to be one of ${JSON.stringify(expecteds)}`,
+    pass: expecteds.indexOf(actual) !== -1
   };
 }
 
-function toBeChartOfSize() {
+export function toBeValidChart(actual) {
+  const Chart = getChart();
+  let message = null;
+
+  if (Chart && !(actual instanceof Chart)) {
+    message = 'Expected ' + actual + ' to be an instance of Chart';
+  } else if (Object.prototype.toString.call(actual.canvas) !== '[object HTMLCanvasElement]') {
+    message = 'Expected canvas to be an instance of HTMLCanvasElement';
+  } else if (Object.prototype.toString.call(actual.ctx) !== '[object CanvasRenderingContext2D]') {
+    message = 'Expected context to be an instance of CanvasRenderingContext2D';
+  } else if (typeof actual.height !== 'number' || !isFinite(actual.height)) {
+    message = 'Expected height to be a strict finite number';
+  } else if (typeof actual.width !== 'number' || !isFinite(actual.width)) {
+    message = 'Expected width to be a strict finite number';
+  }
+
   return {
-    compare: function (actual, expected) {
-      var res = toBeValidChart().compare(actual);
-      if (!res.pass) {
-        return res;
-      }
-
-      var message = null;
-      var canvas = actual.ctx.canvas;
-      var style = getComputedStyle(canvas);
-      var pixelRatio = actual.options.devicePixelRatio || window.devicePixelRatio;
-      var dh = parseInt(style.height, 10) || 0;
-      var dw = parseInt(style.width, 10) || 0;
-      var rh = canvas.height;
-      var rw = canvas.width;
-      var orh = rh / pixelRatio;
-      var orw = rw / pixelRatio;
-
-      // sanity checks
-      if (actual.height !== orh) {
-        message = 'Expected chart height ' + actual.height + ' to be equal to original render height ' + orh;
-      } else if (actual.width !== orw) {
-        message = 'Expected chart width ' + actual.width + ' to be equal to original render width ' + orw;
-      }
-
-      // validity checks
-      if (dh !== expected.dh) {
-        message = 'Expected display height ' + dh + ' to be equal to ' + expected.dh;
-      } else if (dw !== expected.dw) {
-        message = 'Expected display width ' + dw + ' to be equal to ' + expected.dw;
-      } else if (rh !== expected.rh) {
-        message = 'Expected render height ' + rh + ' to be equal to ' + expected.rh;
-      } else if (rw !== expected.rw) {
-        message = 'Expected render width ' + rw + ' to be equal to ' + expected.rw;
-      }
-
-      return {
-        message: message ? message : 'Expected ' + actual + ' to be a chart of size ' + expected,
-        pass: !message
-      };
-    }
+    message: () => message || 'Expected ' + actual + ' to be valid chart',
+    pass: !message
   };
 }
 
-function toEqualImageData() {
+export function toBeChartOfSize(actual, expected) {
+  const valid = toBeValidChart(actual);
+  if (!valid.pass) {
+    return valid;
+  }
+
+  let message = null;
+  const canvas = actual.ctx.canvas;
+  const style = getComputedStyle(canvas);
+  const pixelRatio = actual.options.devicePixelRatio || window.devicePixelRatio;
+  const dh = parseInt(style.height, 10) || 0;
+  const dw = parseInt(style.width, 10) || 0;
+  const rh = canvas.height;
+  const rw = canvas.width;
+  const orh = rh / pixelRatio;
+  const orw = rw / pixelRatio;
+
+  // sanity checks
+  if (actual.height !== orh) {
+    message = 'Expected chart height ' + actual.height + ' to be equal to original render height ' + orh;
+  } else if (actual.width !== orw) {
+    message = 'Expected chart width ' + actual.width + ' to be equal to original render width ' + orw;
+  }
+
+  // validity checks
+  if (dh !== expected.dh) {
+    message = 'Expected display height ' + dh + ' to be equal to ' + expected.dh;
+  } else if (dw !== expected.dw) {
+    message = 'Expected display width ' + dw + ' to be equal to ' + expected.dw;
+  } else if (rh !== expected.rh) {
+    message = 'Expected render height ' + rh + ' to be equal to ' + expected.rh;
+  } else if (rw !== expected.rw) {
+    message = 'Expected render width ' + rw + ' to be equal to ' + expected.rw;
+  }
+
   return {
-    compare: function (actual, expected, opts) {
-      var message = null;
-      var debug = opts.debug || false;
-      var tolerance = opts.tolerance === undefined ? 0.001 : opts.tolerance;
-      var threshold = opts.threshold === undefined ? 0.1 : opts.threshold;
-      var ctx, idata, ddata, w, h, aw, ah, count, ratio;
-
-      if (actual instanceof Chart) {
-        ctx = actual.ctx;
-      } else if (actual instanceof HTMLCanvasElement) {
-        ctx = actual.getContext('2d');
-      } else if (actual instanceof CanvasRenderingContext2D) {
-        ctx = actual;
-      }
-
-      if (ctx) {
-        h = expected.height;
-        w = expected.width;
-        aw = ctx.canvas.width;
-        ah = ctx.canvas.height;
-        idata = ctx.getImageData(0, 0, aw, ah);
-        ddata = createImageData(w, h);
-        if (aw === w && ah === h) {
-          count = pixelmatch(idata.data, expected.data, ddata.data, w, h, {threshold: threshold});
-        } else {
-          count = Math.abs(aw * ah - w * h);
-        }
-        ratio = count / (w * h);
-
-        if (ratio > tolerance || debug) {
-          message = buildPixelMatchPreview(idata, expected, ddata, threshold, tolerance, count, opts.description);
-        }
-      } else {
-        message = 'Input value is not a valid image source.';
-      }
-
-      return {
-        message: message,
-        pass: !message
-      };
-    }
+    message: () => message || 'Expected ' + actual + ' to be a chart of size ' + JSON.stringify(expected),
+    pass: !message
   };
 }
 
-export default {
+/**
+ * Compares a rendered canvas against a reference image.
+ * @param {object} actual - a Chart, a canvas or a 2d context
+ * @param {ImageData} expected - the reference image data
+ * @param {object} [opts] - comparison options
+ * @param {number} [opts.threshold] - per pixel color distance, see pixelmatch
+ * @param {number} [opts.tolerance] - accepted ratio of differing pixels
+ * @param {boolean} [opts.checkerboard] - blend transparency against a checkerboard instead of white
+ * @param {boolean} [opts.debug] - always fail and log the preview
+ * @param {string} [opts.description] - label for the logged preview
+ */
+export function toEqualImageData(actual, expected, opts = {}) {
+  const ctx = resolveContext(actual);
+  if (!ctx) {
+    return {message: () => 'Input value is not a valid image source.', pass: false};
+  }
+  if (!expected) {
+    return {message: () => 'Missing reference image.', pass: false};
+  }
+
+  const threshold = opts.threshold === undefined ? DEFAULT_THRESHOLD : opts.threshold;
+  const tolerance = opts.tolerance === undefined ? DEFAULT_TOLERANCE : opts.tolerance;
+  // pixelmatch 7.2.0 added a `checkerboard` option and defaulted it to true,
+  // changing how semi-transparent pixels are compared. Every reference image
+  // captured with pixelmatch 5 -- which is every image this package has ever
+  // compared -- was blended against plain white. Checkerboard blending is a
+  // different measurement rather than a stricter one: each goes blind where the
+  // ink color meets the background it is blended against. Default to white, and
+  // let a fixture opt into the checkerboard once its reference image has been
+  // re-validated against it.
+  const checkerboard = opts.checkerboard === true;
+  const {height, width} = expected;
+  const actualWidth = ctx.canvas.width;
+  const actualHeight = ctx.canvas.height;
+
+  const actualData = ctx.getImageData(0, 0, actualWidth, actualHeight);
+  const diffData = createImageData(width, height);
+  const count = actualWidth === width && actualHeight === height
+    ? pixelmatch(actualData.data, expected.data, diffData.data, width, height, {checkerboard, threshold})
+    : Math.abs(actualWidth * actualHeight - width * height);
+  const ratio = count / (width * height);
+  const pass = ratio <= tolerance && !opts.debug;
+
+  if (!pass) {
+    logPreview(opts.description || 'fixture', [
+      {data: actualData, label: 'actual'},
+      {data: expected, label: 'expected'},
+      {data: diffData, label: 'diff'}
+    ]);
+  }
+
+  return {
+    message: () => 'Expected the rendered canvas to match the reference image.\n' +
+      `  Size: ${actualWidth}x${actualHeight}, expected ${width}x${height}\n` +
+      `  Difference: ${count}px / ${toPercent(ratio)}%\n` +
+      `  Threshold: ${toPercent(threshold)}%, tolerance: ${toPercent(tolerance)}%`,
+    pass
+  };
+}
+
+export function toEqualOptions(actual, expected) {
+  const result = compareOptions(actual, expected);
+  return {
+    message: () => result.message || 'Expected options to differ',
+    pass: result.pass
+  };
+}
+
+export const matchers = {
+  toBeChartOfSize,
   toBeCloseToPixel,
   toBeCloseToPoint,
-  toEqualOneOf,
   toBeValidChart,
-  toBeChartOfSize,
   toEqualImageData,
+  toEqualOneOf,
   toEqualOptions
 };
+
+export default matchers;
