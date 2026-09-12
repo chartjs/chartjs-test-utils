@@ -6,8 +6,14 @@
   "main": "./src/index.js",
   "module": "./src/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./node": "./src/node.js",
+    ".": {
+      "types": "./types/entry.d.ts",
+      "default": "./src/index.js"
+    },
+    "./node": {
+      "types": "./types/generated/node.d.ts",
+      "default": "./src/node.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -15,17 +21,22 @@
     "fixtures:update": "node scripts/update-fixtures.mjs",
     "format": "biome check --write",
     "lint": "biome check",
-    "test": "npm run lint && npm run typecheck && npm run test:unit && npm run test:browser",
+    "prepack": "npm run types",
+    "pretypes": "node -e \"require('node:fs').rmSync('types/generated', {recursive: true, force: true})\"",
+    "test": "npm run lint && npm run typecheck && npm run test:types && npm run test:unit && npm run test:browser",
     "test:browser": "vitest run --config vitest.browser.config.ts",
+    "test:types": "npm run types && tsc --noEmit -p test/types/tsconfig.json",
     "test:unit": "vitest run --config vitest.config.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.tooling.json"
+    "typecheck": "tsc --noEmit -p tsconfig.tooling.json",
+    "types": "tsc -p tsconfig.types.json"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chartjs/chartjs-test-utils.git"
   },
   "files": [
-    "src/*.js"
+    "src/*.js",
+    "types/**/*.d.ts"
   ],
   "keywords": [
     "chart.js",
@@ -60,6 +71,14 @@
   "peerDependenciesMeta": {
     "@vitest/browser": {
       "optional": true
+    }
+  },
+  "types": "./types/entry.d.ts",
+  "typesVersions": {
+    "*": {
+      "node": [
+        "./types/generated/node.d.ts"
+      ]
     }
   }
 }
