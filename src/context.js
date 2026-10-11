@@ -1,4 +1,53 @@
 // Code from https://stackoverflow.com/questions/4406864/html-canvas-unit-testing
+
+// The 2d context methods the mock records. Module scope, and exported, so the
+// declared surface in types/entry.d.ts can be checked against it -- see
+// test/unit/context.test.js.
+export const mockContextMethods = {
+  arc: () => {},
+  arcTo: () => {},
+  beginPath: () => {},
+  bezierCurveTo: () => {},
+  clearRect: () => {},
+  clip: () => {},
+  closePath: () => {},
+  fill: () => {},
+  fillRect: () => {},
+  fillText: () => {},
+  strokeText: () => {},
+  lineTo: () => {},
+  measureText: (text) => {
+    // return the number of characters * fixed size
+    // Uses fake numbers for the bounding box
+    return text
+      ? {
+          actualBoundingBoxAscent: 4,
+          actualBoundingBoxDescent: 8,
+          actualBoundingBoxLeft: 15,
+          actualBoundingBoxRight: 25,
+          width: text.length * 10
+        }
+      : {
+          actualBoundingBoxAscent: 0,
+          actualBoundingBoxDescent: 0,
+          actualBoundingBoxLeft: 0,
+          actualBoundingBoxRight: 0,
+          width: 0
+        };
+  },
+  moveTo: () => {},
+  quadraticCurveTo: () => {},
+  rect: () => {},
+  restore: () => {},
+  rotate: () => {},
+  save: () => {},
+  setLineDash: () => {},
+  stroke: () => {},
+  strokeRect: () => {},
+  setTransform: () => {},
+  translate: () => {}
+};
+
 export default class Context {
   constructor() {
     this._calls = []; // names/args of recorded calls
@@ -100,57 +149,10 @@ export default class Context {
     });
   }
   _initMethods() {
-    // define methods to test here
-    // no way to introspect so we have to do some extra work :(
-    var methods = {
-      arc: () => {},
-      arcTo: () => {},
-      beginPath: () => {},
-      bezierCurveTo: () => {},
-      clearRect: () => {},
-      clip: () => {},
-      closePath: () => {},
-      fill: () => {},
-      fillRect: () => {},
-      fillText: () => {},
-      strokeText: () => {},
-      lineTo: () => {},
-      measureText: (text) => {
-        // return the number of characters * fixed size
-        // Uses fake numbers for the bounding box
-        return text
-          ? {
-              actualBoundingBoxAscent: 4,
-              actualBoundingBoxDescent: 8,
-              actualBoundingBoxLeft: 15,
-              actualBoundingBoxRight: 25,
-              width: text.length * 10
-            }
-          : {
-              actualBoundingBoxAscent: 0,
-              actualBoundingBoxDescent: 0,
-              actualBoundingBoxLeft: 0,
-              actualBoundingBoxRight: 0,
-              width: 0
-            };
-      },
-      moveTo: () => {},
-      quadraticCurveTo: () => {},
-      rect: () => {},
-      restore: () => {},
-      rotate: () => {},
-      save: () => {},
-      setLineDash: () => {},
-      stroke: () => {},
-      strokeRect: () => {},
-      setTransform: () => {},
-      translate: () => {}
-    };
-
-    Object.keys(methods).forEach((name) => {
+    Object.keys(mockContextMethods).forEach((name) => {
       this[name] = (...args) => {
         this.record(name, args);
-        return methods[name].apply(this, args);
+        return mockContextMethods[name].apply(this, args);
       };
     });
   }

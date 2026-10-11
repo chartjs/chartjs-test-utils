@@ -5,7 +5,16 @@
   // (2-space indent, single quotes, semicolons, no spacing inside braces),
   // so that adopting the formatter is not also a restyling of the sources.
   "files": {
-    "includes": ["**/*.js", "**/*.mjs", "**/*.ts", "**/*.json", "**/*.jsonc", "!package-lock.json"]
+    "includes": [
+      "**/*.js",
+      "**/*.mjs",
+      "**/*.ts",
+      "**/*.json",
+      "**/*.jsonc",
+      "!package-lock.json",
+      // Emitted from the JSDoc by `npm run types`, not edited by hand.
+      "!types/generated"
+    ]
   },
   "formatter": {
     "enabled": true,

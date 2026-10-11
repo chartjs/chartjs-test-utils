@@ -144,7 +144,7 @@ export function toBeChartOfSize(actual, expected) {
 /**
  * Compares a rendered canvas against a reference image.
  * @param {object} actual - a Chart, a canvas or a 2d context
- * @param {ImageData} expected - the reference image data
+ * @param {ImageData} [expected] - the reference image data
  * @param {object} [opts] - comparison options
  * @param {number} [opts.threshold] - per pixel color distance, see pixelmatch
  * @param {number} [opts.tolerance] - accepted ratio of differing pixels

@@ -30,6 +30,11 @@ export {compareOptions} from './matchers.options.js';
 export {spritingOff, spritingOn} from './spriting.js';
 export {Context};
 
+/**
+ * A 2d context that records the calls made to it, for tests that assert what a
+ * chart drew rather than how it looked. Works outside the browser.
+ * @returns {Context}
+ */
 export function createMockContext() {
   return new Context();
 }
@@ -53,7 +58,7 @@ function injectWrapperCSS() {
  * the reference images were captured with. Call it once, from a setup file.
  *
  * @param {object} options
- * @param {Function} options.Chart - the `Chart` export of chart.js. Injected
+ * @param {typeof import('chart.js').Chart} options.Chart - the `Chart` export of chart.js. Injected
  *   rather than read from a global: Karma loaded the UMD bundle into `window`,
  *   a bundler does not.
  * @param {number} [options.devicePixelRatio] - pinned to 1 by default, so the
