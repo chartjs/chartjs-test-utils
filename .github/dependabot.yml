@@ -1,0 +1,31 @@
+# This file exists only to give Dependabot pull requests conventional titles.
+#
+# The repository merges by squash and the squash commit takes the pull request
+# title, which semantic-release reads to decide on a release (and which
+# .github/workflows/pr-title.yml validates). Without a commit-message prefix
+# Dependabot titles its pull requests "Bump x from a to b", which is not valid.
+#
+#   runtime dependency  -> "chore(deps): bump x from a to b"
+#   dev dependency      -> "chore(deps-dev): bump x from a to b"
+#
+# Both use a non-releasing type, so Dependabot pull requests do not publish on
+# their own. Only package.json reaches consumers; the lockfile is not
+# published. A lockfile-only bump (including a runtime dependency moving within
+# its existing range, and any transitive package) leaves the published package
+# unchanged and needs no release. When a bump changes a runtime dependency's
+# range in package.json (currently only pixelmatch), edit the pull request
+# title to "fix(deps): ..." before merging so that it publishes a patch.
+#
+# `open-pull-requests-limit: 0` keeps version updates disabled, as before:
+# Dependabot still opens security update pull requests (they are subject to a
+# separate limit) and those follow the commit-message settings below.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    commit-message:
+      prefix: chore
+      include: scope
