@@ -138,6 +138,9 @@ export default defineConfig({
 });
 ```
 
+The images are recompressed losslessly before they are written, because the
+browser's own encoder makes them several times larger than they need to be
+(this needs Node 22.2 or later for `zlib.crc32`).
 Only images that actually changed are rewritten, so an update is a reviewable
 diff rather than every fixture touched. Regenerating one is never routine: it
 means accepting that the output changed.
