@@ -10,6 +10,8 @@ import {writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {defineBrowserCommand} from '@vitest/browser';
 
+import {recompressPng} from './png.js';
+
 /**
  * Builds the `saveFixtureImage` browser command.
  *
@@ -36,7 +38,9 @@ import {defineBrowserCommand} from '@vitest/browser';
 export function createSaveFixtureImage({dir = 'test/fixtures'} = {}) {
   return defineBrowserCommand((_context, name, dataUrl) => {
     const file = resolve(process.cwd(), dir, `${name}.png`);
-    writeFileSync(file, Buffer.from(dataUrl.split(',')[1], 'base64'));
+    // Chromium encodes with the fastest deflate setting, which makes the image
+    // several times larger than its pixels need.
+    writeFileSync(file, recompressPng(Buffer.from(dataUrl.split(',')[1], 'base64')));
     // biome-ignore lint/suspicious/noConsole: telling the developer which image was rewritten
     console.log(`updated ${file}`);
   });
