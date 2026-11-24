@@ -8,7 +8,7 @@
  * here rather than produced here.
  */
 import {expect, it} from 'vitest';
-import {readImageData} from './canvas.js';
+import {createCanvas, readImageData} from './canvas.js';
 import {acquireChart, releaseChart} from './chart.js';
 import {toEqualImageData} from './matchers.js';
 
@@ -76,7 +76,21 @@ async function compareOrSave(chart, name, inputs, json, save) {
   if (expected && toEqualImageData(chart, expected, json).pass) {
     return;
   }
-  await save(name, chart.ctx.canvas.toDataURL());
+  await save(name, toDataURL(chart.ctx.canvas));
+}
+
+/**
+ * An OffscreenCanvas has no `toDataURL`, so its pixels are copied onto a plain
+ * canvas first. `drawImage` copies them as they are, without the round trip
+ * through unpremultiplied `ImageData` that would change semi-transparent ones.
+ */
+function toDataURL(canvas) {
+  if (typeof canvas.toDataURL === 'function') {
+    return canvas.toDataURL();
+  }
+  const copy = createCanvas(canvas.width, canvas.height);
+  copy.getContext('2d').drawImage(canvas, 0, 0);
+  return copy.toDataURL();
 }
 
 function specFromFixture(name, inputs) {

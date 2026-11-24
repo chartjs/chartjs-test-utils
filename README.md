@@ -159,6 +159,12 @@ means accepting that the output changed.
 | `toBeCloseToPoint({x, y})` | rounded to two decimals |
 | `toEqualOneOf([...])` | value is one of the expected |
 
+Both `toEqualImageData` and `toBeValidChart` accept a chart drawn on an
+`OffscreenCanvas` (`acquireChart(config, {useOffscreenCanvas: true})`), and
+`toEqualImageData` also takes the canvas or the 2d context directly. Chromium
+rasterizes an `OffscreenCanvas` slightly differently from an onscreen canvas, so
+an offscreen fixture needs a reference image of its own.
+
 `toEqualImageData` takes `threshold` (per-pixel color distance) and `tolerance`
 (accepted ratio of differing pixels). It blends transparency against white:
 pixelmatch 7.2.0 made checkerboard blending the default, which is a different
