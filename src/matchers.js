@@ -16,17 +16,31 @@ function toPercent(value) {
   return Math.round(value * 10000) / 100;
 }
 
+// `acquireChart(config, {useOffscreenCanvas: true})` draws on an OffscreenCanvas,
+// whose canvas and context are classes of their own. They are compared by tag
+// rather than `instanceof`, so a browser without OffscreenCanvas does not throw.
+const CANVAS_TAGS = ['[object HTMLCanvasElement]', '[object OffscreenCanvas]'];
+const CONTEXT_TAGS = ['[object CanvasRenderingContext2D]', '[object OffscreenCanvasRenderingContext2D]'];
+
+function isCanvas(value) {
+  return CANVAS_TAGS.includes(Object.prototype.toString.call(value));
+}
+
+function isContext(value) {
+  return CONTEXT_TAGS.includes(Object.prototype.toString.call(value));
+}
+
 function resolveContext(actual) {
-  if (actual instanceof CanvasRenderingContext2D) {
+  if (isContext(actual)) {
     return actual;
   }
-  if (actual instanceof HTMLCanvasElement) {
+  if (isCanvas(actual)) {
     return actual.getContext('2d');
   }
   // A Chart instance. `instanceof Chart` only works when the consumer and the
-  // chart under test resolve to the same chart.js copy, the canvas check does
+  // chart under test resolve to the same chart.js copy, the context check does
   // not care.
-  return actual?.ctx instanceof CanvasRenderingContext2D ? actual.ctx : null;
+  return isContext(actual?.ctx) ? actual.ctx : null;
 }
 
 /**
@@ -84,10 +98,10 @@ export function toBeValidChart(actual) {
 
   if (Chart && !(actual instanceof Chart)) {
     message = `Expected ${actual} to be an instance of Chart`;
-  } else if (Object.prototype.toString.call(actual.canvas) !== '[object HTMLCanvasElement]') {
-    message = 'Expected canvas to be an instance of HTMLCanvasElement';
-  } else if (Object.prototype.toString.call(actual.ctx) !== '[object CanvasRenderingContext2D]') {
-    message = 'Expected context to be an instance of CanvasRenderingContext2D';
+  } else if (!isCanvas(actual.canvas)) {
+    message = 'Expected canvas to be an instance of HTMLCanvasElement or OffscreenCanvas';
+  } else if (!isContext(actual.ctx)) {
+    message = 'Expected context to be an instance of CanvasRenderingContext2D or OffscreenCanvasRenderingContext2D';
   } else if (typeof actual.height !== 'number' || !isFinite(actual.height)) {
     message = 'Expected height to be a strict finite number';
   } else if (typeof actual.width !== 'number' || !isFinite(actual.width)) {
@@ -143,7 +157,7 @@ export function toBeChartOfSize(actual, expected) {
 
 /**
  * Compares a rendered canvas against a reference image.
- * @param {object} actual - a Chart, a canvas or a 2d context
+ * @param {object} actual - a Chart, a canvas or a 2d context, onscreen or offscreen
  * @param {ImageData} [expected] - the reference image data
  * @param {object} [opts] - comparison options
  * @param {number} [opts.threshold] - per pixel color distance, see pixelmatch

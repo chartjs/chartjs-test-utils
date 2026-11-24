@@ -99,3 +99,21 @@ describe('matchers', () => {
     expect(createMockContext()).not.toEqualImageData(undefined);
   });
 });
+
+describe('charts on an OffscreenCanvas', () => {
+  it('should be valid charts', (ctx) => {
+    const chart = barChart({canvas: {height: 128, width: 256}, useOffscreenCanvas: true}, ctx);
+
+    expect(chart).toBeValidChart();
+    expect(chart.ctx).toBeInstanceOf(OffscreenCanvasRenderingContext2D);
+  });
+
+  it('should compare as a chart, a canvas and a context', (ctx) => {
+    const chart = barChart({canvas: {height: 128, width: 256}, useOffscreenCanvas: true}, ctx);
+    const expected = chart.ctx.getImageData(0, 0, 256, 128);
+
+    expect(chart).toEqualImageData(expected);
+    expect(chart.canvas).toEqualImageData(expected);
+    expect(chart.ctx).toEqualImageData(expected);
+  });
+});
